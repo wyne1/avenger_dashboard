@@ -1,585 +1,631 @@
-body {
-  font-size: 0.75rem;
-  margin: 0;
-  padding: 0;
-  background-color: #f9f9f9;
-  font-family: "Asap", sans-serif;
-  -webkit-user-select: none;
-  /* Chrome all / Safari all */
-  -moz-user-select: none;
-  /* Firefox all */
-  -ms-user-select: none;
-  /* IE 10+ */
-  user-select: none;
-  /* Likely future */
-}
+/* Table of contents
+––––––––––––––––––––––––––––––––––––––––––––––––
+- Plotly.js
+- Grid
+- Base Styles
+- Typography
+- Links
+- Buttons
+- Forms
+- Lists
+- Code
+- Tables
+- Spacing
+- Utilities
+- Clearing
+- Media Queries
 
-.pretty_container {
-  border-radius: 5px;
-  background-color: white;
-  margin: 0.5rem;
-  padding: 1rem;
+*/
+
+/* PLotly.js
+–––––––––––––––––––––––––––––––––––––––––––––––– */
+/* plotly.js's modebar's z-index is 1001 by default
+ * https://github.com/plotly/plotly.js/blob/7e4d8ab164258f6bd48be56589dacd9bdd7fded2/src/css/_modebar.scss#L5
+ * In case a dropdown is above the graph, the dropdown's options
+ * will be rendered below the modebar
+ * Increase the select option's z-index
+
+ */
+
+/* This was actually not quite right -
+   dropdowns were overlapping each other (edited October 26)
+
+.Select {
+    z-index: 1002;
+}*/
+
+/* Grid
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.container {
   position: relative;
-  border: 1px solid #f1f1f1;
-}
-
-input {
-  padding: 0.5rem 0;
-  border-radius: 5px;
-}
-
-.button:hover {
-  box-shadow: 4px 4px 4px grey;
-  transition: box-shadow 0.5s;
-}
-
-.row {
-  align-items: center;
-}
-
-.modal {
-  display: block;
-  /*Hidden by default */
-  position: fixed;
-  /* Stay in place */
-  z-index: 1000;
-  /* Sit on top */
-  left: 0;
-  top: 0;
   width: 100%;
-  /* Full width */
-  height: 100%;
-  /* Full height */
-  overflow: auto;
-  /* Enable scroll if needed */
-  background-color: rgb(0, 0, 0);
-  /* Fallback color */
-  background-color: rgba(0, 0, 0, 0.4);
-  /* Black w/ opacity */
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
-
-.modal-content {
-  background-color: white;
-  margin: 5% auto;
-  /* 15% from the top and centered */
-  padding: 2rem;
-  width: 50%;
-  /* Could be more or less, depending on screen size */
-  color: #506784;
-  border-radius: 10px;
-}
-
-.button {
-  background-color: #3a7cef;
-  color: white;
-  display: block;
-  border-radius: 5px;
-  text-transform: uppercase;
-  border: none;
-  letter-spacing: 0.1rem;
-  box-shadow: 4px 4px 4px lightgrey;
-  transition: box-shadow 0.5s;
-  width: 50%;
-  padding: 0.75rem;
-  text-align: center;
-  margin-left: 25%;
-}
-.subtitle {
-  text-align: center;
-  color: #333333;
-  font-size: 20px;
-}
-
-tr:nth-child(even) {
-  background-color: #f0f0f0;
-}
-tr:nth-child(odd) {
-  background-color: #fafafa;
-}
-
-td,
-th {
-  border: 0px solid #ddd;
-  padding: 8px;
-  /* float: left; */
-}
-
-.header {
-  margin: 0px;
-  background-color: white;
-  color: #333333;
-  padding-right: 0%;
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: space-between;
-}
-
-.audio {
-  margin: 0px;
-  background-color: None;
-  color: #333333;
-  padding-right: 3%;
-  padding-left: 3%;
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: space-between;
-}
-
-.header img {
-  margin-left: auto;
-  height: 75px;
-  max-width: 33%;
-}
-
-.app-title {
-  color: #333333;
-  padding-left: 5%;
-  font-size: 2.25rem;
-  letter-spacing: -0.1rem;
-  vertical-align: middle;
-  display: flex;
-  flex: 1;
-  flex-direction: row;
-}
-
-#subtitle {
-  display: none;
-}
-
-.indicator_value {
-  color: #333333;
-}
-.header button {
-  background-color: white;
-  box-shadow: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  padding: 12px;
-  cursor: pointer;
-}
-
-#learn_more {
-  display: none;
-}
-
-#menu {
-  display: block;
-  border: none;
-  font-size: 2rem;
-}
-
-
-#menu p {
-  margin-block-start: 0;
-  margin-block-end: 0;
-}
-
-.tabs {
-  border-top: 1px solid lightgrey;
-  display: none;
-  flex-direction: column;
-  padding: 1rem 5%;
-  margin-bottom: 1rem;
-  background-color: white;
-}
-.dropdown-styles {
-  border-radius: 5px;
-  background-color: white;
-  margin: 0.5rem;
-  padding-top: 7px;
-  position: relative;
-  border: 1px solid #f1f1f1;
-}
-.dd-styles {
-  border-radius: 5px;
-  background-color: white;
-  margin: 0.5rem;
-  padding-top: 7px;
-  position: relative;
-  border: 1px solid #f1f1f1;
-}
-.tabs > a {
-  text-decoration: none;
-  color: #333333;
-  font-size: 1.25rem;
-  text-align: center;
-}
-
-.control,
-.Select-control {
-  border: none !important;
-}
-
-table {
-  border: 1px;
-  font-size: 1rem;
+.column,
+.columns {
   width: 100%;
-  font-family: Ubuntu;
+  float: left;
+  box-sizing: border-box;
 }
 
-.table {
-  overflow: scroll;
-}
-
-.indicators {
-  display: flex;
-  align-items: stretch;
-}
-
-.indicator {
-  flex: 1;
-  padding: 0.75rem 1.75rem;
-  text-align: center;
-}
-
-.indicator_value {
-  font-size: 2rem;
-  margin: 1rem 0;
-}
-
-.indicator_value p {
-  margin: 1rem 0;
-}
-
-::-webkit-scrollbar {
-  width: 0px; /* Remove scrollbar space */
-  background: transparent; /* Optional: just make scrollbar invisible */
-}
-
-.has-value.Select--single > .Select-control .Select-value .Select-value-label,
-.has-value.is-pseudo-focused.Select--single
-  > .Select-control
-  .Select-value
-  .Select-value-label {
-  color: #848484;
-}
-
-#cases_reasons {
-  height: 100%;
-}
-
-/* Layouts for different screen sizes */
-@media (max-width: 350px) {
-  .app-title {
-    margin-left: 0 !important;
+/* For devices larger than 400px */
+@media (min-width: 400px) {
+  .container {
+    width: 85%;
+    padding: 0;
   }
 }
 
-@media (max-width: 450px) {
-  .dropdown-styles {
-    width: 28% !important;
-    display: inline-block !important;
+/* For devices larger than 550px */
+@media (min-width: 550px) {
+  .container {
+    width: 80%;
   }
-  .app-title {
-    font-size: 1.5rem !important;
-    padding-left: 4% !important;
-    margin-left: 5%;
-  }
-  .header img {
-    height: 35px !important;
-    padding-left: 3% !important;
-  }
-  .indicator_value {
-    font-size: 1.25rem !important;
-  }
-  .indicator {
-    padding: 0.5rem;
-  }
-  .button {
-    width: 25% !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .indicator {
-    align-content: center;
-    justify-items: center;
-    text-align: center;
+  .column,
+  .columns {
+    margin-left: 4%;
   }
 
-  .indicator:first-child {
-    margin-right: 0;
+  .one.column,
+  .one.columns {
+    width: 4.66666666667%;
   }
-
-  .indicator:last-child {
+  .two.columns {
+    width: 13.3333333333%;
+  }
+  .three.columns {
+    width: 22%;
+  }
+  .four.columns {
+    width: 30.6666666667%;
+  }
+  .five.columns {
+    width: 39.3333333333%;
+  }
+  .six.columns {
+    width: 48%;
+  }
+  .seven.columns {
+    width: 56.6666666667%;
+  }
+  .eight.columns {
+    width: 65.3333333333%;
+  }
+  .nine.columns {
+    width: 74%;
+  }
+  .ten.columns {
+    width: 82.6666666667%;
+  }
+  .eleven.columns {
+    width: 91.3333333333%;
+  }
+  .twelve.columns {
+    width: 100%;
     margin-left: 0;
   }
 
-  #opportunity_grid,
-  #lead_grid,
-  #cases_grid {
-    margin: 10px;
-    margin-bottom: 10%;
+  .one-third.column {
+    width: 30.6666666667%;
   }
-  .app-title {
-    font-size: 2rem;
-    padding-left: 20%;
+  .two-thirds.column {
+    width: 65.3333333333%;
   }
-  .header img {
-    height: 50px;
-    padding-left: 5%;
+
+  .one-half.column {
+    width: 48%;
   }
-  .button {
-    margin: 2% auto;
-    width: 20%;
+
+  /* Offsets */
+  .offset-by-one.column,
+  .offset-by-one.columns {
+    margin-left: 8.66666666667%;
   }
-  .dropdown-styles {
-    width: 30%;
-    display: inline-block;
+  .offset-by-two.column,
+  .offset-by-two.columns {
+    margin-left: 17.3333333333%;
   }
-  .dd-styles {
-    width: 44%;
-    display: inline-block;
+  .offset-by-three.column,
+  .offset-by-three.columns {
+    margin-left: 26%;
   }
-  .indicator_value {
-    font-size: 1.5rem;
+  .offset-by-four.column,
+  .offset-by-four.columns {
+    margin-left: 34.6666666667%;
+  }
+  .offset-by-five.column,
+  .offset-by-five.columns {
+    margin-left: 43.3333333333%;
+  }
+  .offset-by-six.column,
+  .offset-by-six.columns {
+    margin-left: 52%;
+  }
+  .offset-by-seven.column,
+  .offset-by-seven.columns {
+    margin-left: 60.6666666667%;
+  }
+  .offset-by-eight.column,
+  .offset-by-eight.columns {
+    margin-left: 69.3333333333%;
+  }
+  .offset-by-nine.column,
+  .offset-by-nine.columns {
+    margin-left: 78%;
+  }
+  .offset-by-ten.column,
+  .offset-by-ten.columns {
+    margin-left: 86.6666666667%;
+  }
+  .offset-by-eleven.column,
+  .offset-by-eleven.columns {
+    margin-left: 95.3333333333%;
+  }
+
+  .offset-by-one-third.column,
+  .offset-by-one-third.columns {
+    margin-left: 34.6666666667%;
+  }
+  .offset-by-two-thirds.column,
+  .offset-by-two-thirds.columns {
+    margin-left: 69.3333333333%;
+  }
+
+  .offset-by-one-half.column,
+  .offset-by-one-half.columns {
+    margin-left: 52%;
   }
 }
 
-@media (min-width: 900px) {
-  .header {
-    flex-direction: row;
-  }
+/* Base Styles
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+/* NOTE
+html is set to 62.5% so that all the REM measurements throughout Skeleton
+are based on 10px sizing. So basically 1.5rem = 15px :) */
+html {
+  font-size: 62.5%;
+}
+body {
+  font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
+  line-height: 1.6;
+  font-weight: 400;
+  font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  color: rgb(50, 50, 50);
+}
 
-  #subtitle {
-    display: block;
-  }
-  #learn_more {
-    display: block;
-  }
+/* Typography
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: 300;
+}
+h1 {
+  font-size: 4.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.1rem;
+  margin-bottom: 2rem;
+}
+h2 {
+  font-size: 3.6rem;
+  line-height: 1.25;
+  letter-spacing: -0.1rem;
+  margin-bottom: 1.8rem;
+  margin-top: 1.8rem;
+}
+h3 {
+  font-size: 3rem;
+  line-height: 1.3;
+  letter-spacing: -0.1rem;
+  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+}
+h4 {
+  font-size: 2.6rem;
+  line-height: 1.35;
+  letter-spacing: -0.08rem;
+  margin-bottom: 1.2rem;
+  margin-top: 1.2rem;
+}
+h5 {
+  font-size: 2.2rem;
+  line-height: 1.5;
+  letter-spacing: -0.05rem;
+  margin-bottom: 0.6rem;
+  margin-top: 0.6rem;
+}
+h6 {
+  font-size: 2rem;
+  line-height: 1.6;
+  letter-spacing: 0;
+  margin-bottom: 0.75rem;
+  margin-top: 0.75rem;
+}
 
-  #menu {
-    display: none;
-  }
+p {
+  margin-top: 0;
+}
 
-  .tabs {
+/* Blockquotes
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+blockquote {
+  border-left: 4px lightgrey solid;
+  padding-left: 1rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  margin-left: 0rem;
+}
+
+/* Links
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+a {
+  color: #1eaedb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+a:hover {
+  color: #0fa0ce;
+}
+
+/* Buttons
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+  display: inline-block;
+  height: 38px;
+  padding: 0 30px;
+  color: #555;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 38px;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.button:hover,
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+.button:focus,
+button:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+input[type="button"]:focus {
+  color: #333;
+  border-color: #888;
+  outline: 0;
+}
+.button.button-primary,
+button.button-primary,
+input[type="submit"].button-primary,
+input[type="reset"].button-primary,
+input[type="button"].button-primary {
+  color: #fff;
+  background-color: #33c3f0;
+  border-color: #33c3f0;
+}
+.button.button-primary:hover,
+button.button-primary:hover,
+input[type="submit"].button-primary:hover,
+input[type="reset"].button-primary:hover,
+input[type="button"].button-primary:hover,
+.button.button-primary:focus,
+button.button-primary:focus,
+input[type="submit"].button-primary:focus,
+input[type="reset"].button-primary:focus,
+input[type="button"].button-primary:focus {
+  color: #fff;
+  background-color: #1eaedb;
+  border-color: #1eaedb;
+}
+
+/* Forms
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea,
+select {
+  height: 38px;
+  padding: 6px 10px; /* The 6px vertically centers text on FF, ignored by Webkit */
+  background-color: #fff;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  box-shadow: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: inherit; /*https://stackoverflow.com/questions/6080413/why-doesnt-input-inherit-the-font-from-body*/
+}
+/* Removes awkward default styles on some inputs for iOS */
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+textarea {
+  min-height: 65px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border: 1px solid #33c3f0;
+  outline: 0;
+}
+label,
+legend {
+  display: block;
+  margin-bottom: 0px;
+}
+fieldset {
+  padding: 0;
+  border-width: 0;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  display: inline;
+}
+label > .label-body {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-weight: normal;
+}
+
+/* Lists
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+ul {
+  list-style: circle inside;
+}
+ol {
+  list-style: decimal inside;
+}
+ol,
+ul {
+  padding-left: 0;
+  margin-top: 0;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+  margin: 1.5rem 0 1.5rem 3rem;
+  font-size: 90%;
+}
+li {
+  margin-bottom: 1rem;
+}
+
+/* Tables
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+table {
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e1e1e1;
+}
+th:first-child,
+td:first-child {
+  padding-left: 0;
+}
+th:last-child,
+td:last-child {
+  padding-right: 0;
+}
+
+/* Spacing
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+button,
+.button {
+  margin-bottom: 0rem;
+}
+input,
+textarea,
+select,
+fieldset {
+  margin-bottom: 0rem;
+}
+pre,
+dl,
+figure,
+table,
+form {
+  margin-bottom: 0rem;
+}
+p,
+ul,
+ol {
+  margin-bottom: 0.75rem;
+}
+
+/* Utilities
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.u-full-width {
+  width: 100%;
+  box-sizing: border-box;
+}
+.u-max-full-width {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.u-pull-right {
+  float: right;
+}
+.u-pull-left {
+  float: left;
+}
+
+/* Misc
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+hr {
+  margin-top: 3rem;
+  margin-bottom: 3.5rem;
+  border-width: 0;
+  border-top: 1px solid #e1e1e1;
+}
+
+/* Clearing
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+/* Self Clearing Goodness */
+.container:after,
+.row:after,
+.u-cf {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Media Queries
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+/*
+Note: The best way to structure the use of media queries is to create the queries
+near the relevant code. For example, if you wanted to change the styles for buttons
+on small devices, paste the mobile query code up in the buttons section and style it
+there.
+*/
+
+/* Larger than mobile, screen sizes larger than 400px */
+@media (min-width: 400px) {
+}
+
+/* Larger than phablet (also point when grid becomes active), screen larger than 550px */
+@media (min-width: 550px) {
+  .one.column,
+  .one.columns {
+    width: 8%;
+  }
+  .two.columns {
+    width: 16.25%;
+  }
+  .three.columns {
+    width: 22%;
+  }
+  .four.columns {
+    width: calc(100% / 3);
+  }
+  .five.columns {
+    width: calc(100% * 5 / 12);
+  }
+  .six.columns {
+    width: 49.75%;
+  }
+  .seven.columns {
+    width: calc(100% * 7 / 12);
+  }
+}
+
+/* Larger than tablet, for screens smaller than 768px */
+@media (max-width: 550px) {
+  /* .flex-display {
+    display: block !important;
+  } */
+  .pretty_container {
+    margin: 0 !important;
+    margin-bottom: 25px !important;
+  }
+  #individual_graph,
+  #count_graph,
+  #aggregate_graph {
+    position: static !important;
+  }
+  .container-display {
     display: flex;
-    flex-direction: row;
+  }
+  #wells,
+  #gas,
+  #oil {
+    margin-right: 10px;
   }
 
-  .tabs > a {
-    width: 20%;
+  #wells {
+    margin-left: 0px;
   }
+  #water {
+    margin-right: 0px;
+  }
+  .mini_container {
+    margin-bottom: 25px !important;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    position: relative;
+    box-shadow: 2px 2px 2px lightgrey;
+  }
+  #plotly-image {
+    margin-bottom: 0px !important;
+    height: 45px !important;
+  }
+  #learn-more-button {
+    margin-top: 0px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+  }
+  #button {
+    display: flex;
+    justify-content: center;
+  }
+  #title {
+    margin-bottom: 10px;
+  }
+  h3 {
+    font-size: 2.5rem;
+  }
+  h5 {
+    font-size: 2rem;
+  }
+  h6 {
+    font-size: 1.25rem;
+  }
+  p {
+    font-size: 11px;
+  }
+}
 
-  .tabs > a:first-child {
-    border-right: 1px solid lightgrey;
-  }
+/* Larger than desktop */
+@media (min-width: 1000px) {
+}
 
-  .tabs > a:last-child {
-    border-left: 1px solid lightgrey;
-  }
-
-  #lead_grid {
-    display: -ms-grid;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-template-rows: auto;
-    -ms-grid-rows: auto;
-    width: 80%;
-    margin-bottom: 10%;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  #new_lead {
-    -ms-grid-column: 6;
-    -ms-grid-column-span: 1;
-    grid-column: 6 / 7;
-    -ms-grid-row: 1;
-    -ms-grid-row-span: 1;
-    grid-row: 1 / 2;
-    align-self: end;
-  }
-
-  #leads_per_state {
-    -ms-grid-column: 1;
-    -ms-grid-column-span: 2;
-    grid-column: 1 / 3;
-    -ms-grid-row: 2;
-    -ms-grid-row-span: 3;
-    grid-row: 2 / 5;
-  }
-
-  #lead_grid > .indicators {
-    -ms-grid-row: 2;
-    -ms-grid-row-span: 1;
-    grid-row: 2 / 3;
-    -ms-grid-column: 3;
-    -ms-grid-column-span: 4;
-    grid-column: 3 / 7;
-  }
-
-  #submit_new_lead {
-    padding: 10px;
-  }
-
-  #leads_source_container {
-    -ms-grid-row: 3;
-    -ms-grid-row-span: 2;
-    grid-row: 3 / 5;
-    -ms-grid-column: 3;
-    -ms-grid-column-span: 2;
-    grid-column: 3 / 5;
-  }
-
-  #converted_leads_container {
-    -ms-grid-row: 3;
-    -ms-grid-row-span: 2;
-    grid-row: 3 / 5;
-    -ms-grid-column: 5;
-    -ms-grid-column-span: 2;
-    grid-column: 5 / 7;
-  }
-
-  #leads_table {
-    -ms-grid-row: 6;
-    -ms-grid-row-span: 4;
-    grid-row: 6 / 10;
-    -ms-grid-column: 1;
-    -ms-grid-column-span: 6;
-    grid-column: 1 / 7;
-    max-height: 500px;
-  }
-
-  #opportunity_grid {
-    display: -ms-grid;
-    display: grid;
-    width: 80%;
-    margin-bottom: 10%;
-    margin-left: auto;
-    margin-right: auto;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-template-rows: auto;
-    -ms-grid-rows: auto;
-  }
-
-  #new_opportunity {
-    -ms-grid-column: 6;
-    -ms-grid-column-span: 1;
-    grid-column: 6 / 7;
-    -ms-grid-row: 1;
-    -ms-grid-row-span: 1;
-    grid-row: 1 / 1;
-    align-self: end;
-  }
-
-  #converted_count_container {
-    -ms-grid-column: 1;
-    -ms-grid-column-span: 2;
-    grid-column: 1 / 3;
-    -ms-grid-row: 2;
-    -ms-grid-row-span: 4;
-    grid-row: 2 / 6;
-  }
-
-  #opportunity_indicators {
-    -ms-grid-column: 3;
-    -ms-grid-column-span: 4;
-    grid-column: 3 / 7;
-    -ms-grid-row: 2;
-    -ms-grid-row-span: 1;
-    grid-row: 2 / 3;
-  }
-
-  #opportunity_heatmap {
-    -ms-grid-column: 3;
-    -ms-grid-column-span: 4;
-    grid-column: 3 / 7;
-    -ms-grid-row: 3;
-    -ms-grid-row-span: 3;
-    grid-row: 3 / 6;
-  }
-
-  #top_open_container {
-    -ms-grid-column: 1;
-    -ms-grid-column-span: 3;
-    grid-column: 1 / 4;
-    -ms-grid-row: 6;
-    -ms-grid-row-span: 4;
-    grid-row: 6 / 7;
-  }
-
-  #top_lost_container {
-    -ms-grid-column: 4;
-    -ms-grid-column-span: 3;
-    grid-column: 4 / 7;
-    -ms-grid-row: 6;
-    -ms-grid-row-span: 4;
-    grid-row: 6 / 7;
-  }
-
-  #cases_grid {
-    display: -ms-grid;
-    display: grid;
-    width: 80%;
-    margin-bottom: 10%;
-    margin-left: auto;
-    margin-right: auto;
-    -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    -ms-grid-rows: auto;
-    grid-template-rows: auto;
-  }
-
-  #new_case {
-    -ms-grid-column: 6;
-    -ms-grid-column-span: 1;
-    grid-column: 6 / 7;
-    -ms-grid-row: 1;
-    -ms-grid-row-span: 1;
-    grid-row: 1 / 1;
-    align-self: end;
-  }
-
-  #cases_types_container {
-    -ms-grid-column: 1;
-    -ms-grid-column-span: 2;
-    grid-column: 1 / 3;
-    -ms-grid-row: 2;
-    -ms-grid-row-span: 3;
-    grid-row: 2 / 5;
-  }
-
-  #cases_indicators {
-    -ms-grid-column: 3;
-    -ms-grid-column-span: 4;
-    grid-column: 3 / 7;
-    -ms-grid-row: 2;
-    -ms-grid-row-span: 1;
-    grid-row: 2 / 3;
-  }
-
-  #cases_reasons_container {
-    -ms-grid-column: 3;
-    -ms-grid-column-span: 2;
-    grid-column: 3 / 5;
-    -ms-grid-row: 3;
-    -ms-grid-row-span: 2;
-    grid-row: 3 / 5;
-  }
-
-  #cases_by_period_container {
-    -ms-grid-column: 5;
-    -ms-grid-column-span: 2;
-    grid-column: 5 / 7;
-    -ms-grid-row: 3;
-    -ms-grid-row-span: 2;
-    grid-row: 3 / 5;
-  }
-
-  #cases_by_account_container {
-    -ms-grid-column: 1;
-    -ms-grid-column-span: 6;
-    grid-column: 1 / 7;
-    -ms-grid-row: 5;
-    -ms-grid-row-span: 1;
-    grid-row: 5 / 6;
-  }
-
-  #cases_by_account {
-    display: block;
-    height: 100%;
-  }
+/* Larger than Desktop HD */
+@media (min-width: 1200px) {
 }

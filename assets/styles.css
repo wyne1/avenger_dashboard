@@ -1,0 +1,49 @@
+html {
+  font-size: 62.5%;
+}
+body {
+  font-size: 1.5em;
+  line-height: 1.6;
+  font-weight: 400;
+  font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  color: rgb(50, 50, 50);
+}
+
+.flex-display {
+  display: flex;
+  flex-direction: row;
+}
+
+#audio_analysis {
+  margin: 0;
+  padding: 10px;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+  width: calc(100%-10px);
+  /* background: #8BFFB9; */
+}
+
+#audio_label {
+  margin: 0;
+  padding: 10px;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+  width: calc(100%-10px);
+  /* background: #8BFFB9; */
+}
+
+#plotly-image {
+  margin-bottom: 0px !important;
+  height: 120px !important;
+}
+
+
+#header {
+  align-items: center;
+}
+
+#player {
+  /* width: calc(80%-30px); */
+
+}

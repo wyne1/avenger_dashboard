@@ -37,10 +37,10 @@ app.layout = html.Div(
                     href="https://plot.ly/dash/",
                 ),
             ],
-        
+
         ),
-        
-        
+
+
         html.Div(
             id="tabs",
             className="row tabs",
@@ -49,8 +49,8 @@ app.layout = html.Div(
                 dcc.Link("History", href="/"),
             ],
         ),
-        
-        
+
+
         html.Div(
             id="audio",
             className = "row audio",
@@ -58,14 +58,19 @@ app.layout = html.Div(
                 html.Audio(id="player", src=FILE, controls=True)
             ],
         ),
-        
-        
+
+
         #SECOND DIV ENDS HERE
-        
-        
-        
+
+
+
     ]
 )
+
+app.css.append_css({
+    "external_url":"https://codepen.io/chriddyp/pen/bWLwgP.css"
+
+})
 
 if __name__ == '__main__':
     app.run_server(debug=True)
