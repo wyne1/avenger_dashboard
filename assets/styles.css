@@ -10,23 +10,71 @@ body {
   color: rgb(50, 50, 50);
 }
 
+#mainContainer {
+  display: flex;
+  flex-direction: column;
+}
+
 .flex-display {
   display: flex;
-  flex-direction: row;
+  /* flex-direction: row; */
+}
+
+.pretty_container {
+  /* border-radius: 5px; */
+  background-color: #f9f9f9;
+  margin: 10px;
+  padding: 15px;
+  position: relative;
+  /* box-shadow: 2px 2px 2px lightgrey; */
+}
+
+.two.columns {
+  width: 16.25%;
+}
+
+.column,
+.columns {
+  margin-left: 0.5%;
+}
+
+#parent_div {
+  box-shadow: 1px 1px 2px 2px lightgrey;
+}
+#title {
+  text-align: center;
+}
+
+#waveform {
+  flex: 5;
+  position: relative;
 }
 
 #audio_analysis {
+  /* display: flex;
+  flex-direction: column; */
   margin: 0;
-  padding: 10px;
+  padding: 30px;
   padding-bottom: 0px;
   margin-bottom: 0px;
   width: calc(100%-10px);
+  /* box-shadow: 2px 2px 2px 2px lightgrey; */
   /* background: #8BFFB9; */
 }
 
+#vertical_line {
+  border-left: 2px solid lightgrey;
+  border-radius: 5px;
+  top: 0;
+}
+
 #audio_label {
+  /* box-shadow: 2px 2px 2px 2px lightgrey; */
+  vertical-align: text-top;
+  display: table;
+  flex-direction: column;
   margin: 0;
-  padding: 10px;
+  padding: 30px;
   padding-bottom: 0px;
   margin-bottom: 0px;
   width: calc(100%-10px);
@@ -46,4 +94,21 @@ body {
 #player {
   /* width: calc(80%-30px); */
 
+}
+
+.js-plotly-plot .plotly .modebar {
+  padding-top: 5%;
+  margin-right: 3.5%;
+}
+
+
+#learn-more-button {
+  text-align: center;
+  height: 100%;
+  padding: 0 20px;
+  text-transform: none;
+  font-size: 15px;
+  float: right;
+  margin-right: 10px;
+  margin-top: 30px;
 }

@@ -109,14 +109,14 @@
   }
 
   .one-third.column {
-    width: 30.6666666667%;
+    width: 33.6666666667%;
   }
   .two-thirds.column {
     width: 65.3333333333%;
   }
 
   .one-half.column {
-    width: 48%;
+    width: 55%;
   }
 
   /* Offsets */
@@ -594,7 +594,7 @@ there.
   }
   #plotly-image {
     margin-bottom: 0px !important;
-    height: 45px !important;
+    height: 20px !important;
   }
   #learn-more-button {
     margin-top: 0px !important;

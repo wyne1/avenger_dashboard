@@ -13,9 +13,19 @@ from pydub import AudioSegment
 import os
 import numpy as np
 import plotly.express as px
+import matplotlib.pyplot as plt
+import wave
+import sys
+
+from controls import LABELS
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
 )
+
+
+label_options = [
+    {"label": str(LABELS[label]), "value": str(label)} for label in LABELS
+]
 
 FILE = "http://localhost:8050/assets/rockstar.mp3"
 PATH = "assets/rockstar.mp3"
@@ -53,9 +63,41 @@ def generate_plot(step=1):
 
 
     return fig
+#
+# def generate_plot():
+#     spf = wave.open("assets/test-7.wav", "r")
+#
+#     # Extract Raw Audio from Wav File
+#     signal = spf.readframes(-1)
+#     signal = np.fromstring(signal, "Int16")
+#
+#
+#     # If Stereo
+#     if spf.getnchannels() == 2:
+#         print("Just mono files")
+#         sys.exit(0)
+#
+#     plt.figure(1)
+#     plt.title("Signal Wave...")
+#     plt.plot(signal)
 
 fig = generate_plot()
-
+layout = dict(
+    autosize=True,
+    automargin=True,
+    margin=dict(l=30, r=30, b=20, t=40),
+    hovermode="closest",
+    plot_bgcolor="#F9F9F9",
+    paper_bgcolor="#F9F9F9",
+    legend=dict(font=dict(size=10), orientation="h"),
+    title="Satellite Overview",
+    # mapbox=dict(
+    #     accesstoken=mapbox_access_token,
+    #     style="light",
+    #     center=dict(lon=-78.05, lat=42.54),
+    #     zoom=7,
+    # ),
+)
 
 app.layout = html.Div(
     [
@@ -67,7 +109,7 @@ app.layout = html.Div(
                             src=app.get_asset_url("forest.png"),
                             id="plotly-image",
                             style={
-                                "height": "130px",
+                                "height": "60px",
                                 "width": "auto",
                                 "margin-bottom": "25px",
                             },
@@ -91,20 +133,35 @@ app.layout = html.Div(
                     ],
                     className="one-half column",
                     id="title",
-                )
+                ),
+                html.Div(
+                    [
+                        html.A(
+                            html.Button("GitHub Page", id="learn-more-button"),
+                            href="https://github.com/abdylan/audioAnn_GUI",
+                        )
+                    ],
+                    className="one-third column",
+                    id="button",
+                ),
             ],
             id="header",
             className="row flex-display",
-            style={"margin-bottom": "25px"},
+            # style={"margin-bottom": "25px"},
         ),
 
         html.Div(
-            id="tabs",
-            className="row tabs",
-            children=[
-                dcc.Link("Page 1", href="/"),
-                dcc.Link("Page 2", href="/"),
+            [
+                html.Div(
+                    [
+                        dcc.Link("Audio Analysis", href="/"),
+                        dcc.Link("Event History", href="/"),
+                    ],
+                    id="tabs",
+                    className="row tabs",
+                ),
             ],
+
         ),
 
         html.Div(
@@ -128,15 +185,23 @@ app.layout = html.Div(
                         html.H6(
                             "Audio Graph",
                         ),
+
                         dcc.Graph(
                             figure = fig,
-                            id="waveform",
+                            # id="waveform",
+                            # style = {"padding":"30px"}
                         )
 
                     ],
-                    className="pretty_container six columns six rows",
+                    className="eight columns",
                     id="audio_analysis"
                 ),
+
+                html.Div(
+                    id="vertical_line",
+                    className="one columns"
+                ),
+
                 html.Div(
                     [
                         html.H3(
@@ -146,27 +211,44 @@ app.layout = html.Div(
                         html.H6(
                             "Predicted Labels",
                         ),
+                        html.P(
+                            "Labels predicted by AI Model",
+                        ),
+                        dcc.Dropdown(
+                            id="client_label2",
+                            options=label_options,
+                            multi=True,
+                            value=list(LABELS.keys()),
+                            className="dcc_control",
+                        ),
                         html.H6(
                             "Label the Audio",
                         ),
                         html.P(
                             "Choose all labels that you feel are present in the audio"
                         ),
+                        dcc.Dropdown(
+                            id="client_label",
+                            options=label_options,
+                            multi=True,
+                            # value=list(LABELS.keys()),
+                            className="dcc_control",
+                        ),
                         html.H6(
                             "Audio Data Labelling",
                         )
-
                     ],
-                    className="pretty_container four columns six rows",
+                    className="five columns",
                     id="audio_label",
                     # style={"padding-top": "0px", "margin-top": "0px"}
                 ),
             ],
-            # className="row flex-display"
+            id="parent_div",
+            className="flex-display"
         ),
 
     ],
-    className="pretty_container",
+    className="mainContainer",
 )
 
 #
