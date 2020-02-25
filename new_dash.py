@@ -234,8 +234,18 @@ app.layout = html.Div(
                             # value=list(LABELS.keys()),
                             className="dcc_control",
                         ),
-                        html.H6(
-                            "Audio Data Labelling",
+                        html.Span(
+                            "Add new",
+                            id="submit-sample-button",
+                            n_clicks=0,
+                            className="button_labels",
+                        ),
+                        # html.A(
+                        #     html.Button("Submit", id="submit-sample-button"),
+                        #     href="/",
+                        # ),
+                        html.Div(children=[],
+                            id="button-output"
                         )
                     ],
                     className="five columns",
@@ -250,6 +260,22 @@ app.layout = html.Div(
     ],
     className="mainContainer",
 )
+
+@app.callback(
+    Output("button-output", "children"),
+    [Input("submit-sample-button", "n_clicks")],
+    [
+        State("client_label", "value")
+    ]
+)
+def button_submit(n_clicks, human_labels):
+    print("Button Clicked!! ", n_clicks)
+    print(human_labels)
+
+    ## Submit Labels + Meta to Cosmos DB
+
+    dummy_text = html.P("Submitted Labels!!")
+    return dummy_text
 
 #
 # app.css.append_css({
