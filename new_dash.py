@@ -188,8 +188,6 @@ app.layout = html.Div(
 
                         dcc.Graph(
                             figure = fig,
-                            # id="waveform",
-                            # style = {"padding":"30px"}
                         )
 
                     ],
@@ -235,7 +233,7 @@ app.layout = html.Div(
                             className="dcc_control",
                         ),
                         html.Span(
-                            "Add new",
+                            "Submit",
                             id="submit-sample-button",
                             n_clicks=0,
                             className="button_labels",
