@@ -3,3 +3,4 @@ dash_examples/
 .ipynb_checkpoints
 __pycache__/
 *.pyc
+config.ini
