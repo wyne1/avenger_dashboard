@@ -9,13 +9,13 @@ import pandas as pd
 from dash.dependencies import Input, Output, State, ClientsideFunction
 import dash_core_components as dcc
 import dash_html_components as html
-from pydub import AudioSegment
 import os
 import numpy as np
-import plotly.express as px
 import matplotlib.pyplot as plt
-import wave
 import sys
+
+from utils.visuals import get_spectrogram
+import 
 
 from controls import LABELS
 app = dash.Dash(
@@ -29,75 +29,9 @@ label_options = [
 
 FILE = "http://localhost:8050/assets/rockstar.mp3"
 PATH = "assets/rockstar.mp3"
-podcast = AudioSegment.from_mp3(PATH)
-PODCAST_LENGTH = podcast.duration_seconds
-PODCAST_INTERVAL = 500
 
 
-def seconds_to_MMSS(slider_seconds):
-    decimal, minutes = math.modf(slider_seconds / 60.0)
-    seconds = str(round(decimal * 60.0))
-    if len(seconds) == 1:
-        seconds = "0" + seconds
-    MMSS = "{0}:{1}".format(round(minutes), seconds)
-    return MMSS
-
-def generate_plot(step=1):
-    print(PODCAST_INTERVAL * step, PODCAST_INTERVAL * (step + 1))
-    # 5 second interval of podcast
-    seg = podcast[PODCAST_INTERVAL * step: PODCAST_INTERVAL * (step + 1)]
-    samples = seg.get_array_of_samples()
-    arr = np.array(samples)
-    df = pd.DataFrame(arr)
-    df['idx'] = df.index.values
-    df.columns = ['y', 'idx']
-    fig = px.line(df, x='idx', y='y', render_mode="webgl")
-    fig.update_layout(
-        height=250,
-        margin_r=0,
-        margin_l=0,
-        margin_t=0,
-        yaxis_title="",
-        yaxis_fixedrange=True,
-    )
-
-
-    return fig
-#
-# def generate_plot():
-#     spf = wave.open("assets/test-7.wav", "r")
-#
-#     # Extract Raw Audio from Wav File
-#     signal = spf.readframes(-1)
-#     signal = np.fromstring(signal, "Int16")
-#
-#
-#     # If Stereo
-#     if spf.getnchannels() == 2:
-#         print("Just mono files")
-#         sys.exit(0)
-#
-#     plt.figure(1)
-#     plt.title("Signal Wave...")
-#     plt.plot(signal)
-
-fig = generate_plot()
-layout = dict(
-    autosize=True,
-    automargin=True,
-    margin=dict(l=30, r=30, b=20, t=40),
-    hovermode="closest",
-    plot_bgcolor="#F9F9F9",
-    paper_bgcolor="#F9F9F9",
-    legend=dict(font=dict(size=10), orientation="h"),
-    title="Satellite Overview",
-    # mapbox=dict(
-    #     accesstoken=mapbox_access_token,
-    #     style="light",
-    #     center=dict(lon=-78.05, lat=42.54),
-    #     zoom=7,
-    # ),
-)
+spec_data = get_spectrogram()
 
 app.layout = html.Div(
     [
@@ -185,13 +119,15 @@ app.layout = html.Div(
                         html.H6(
                             "Audio Graph",
                         ),
-
-                        dcc.Graph(
-                            figure = fig,
-                            # id="waveform",
-                            # style = {"padding":"30px"}
-                        )
-
+                        html.Img(
+                        	id='spectrogram',
+                        	src="data:image/png;base64,{}".format(spec_data),
+                        	style = {"padding":"30px"})
+                        # dcc.Graph(
+                        #     figure = fig,
+                        #     # id="waveform",
+                        #     # style = {"padding":"30px"}
+                        # )
                     ],
                     className="eight columns",
                     id="audio_analysis"
