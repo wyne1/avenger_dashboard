@@ -1,21 +1,16 @@
 # Import required libraries
-import copy
-import pathlib
+import time
 import dash
-import math
-import datetime as dt
-import pandas as pd
 from dash.dependencies import Input, Output, State, ClientsideFunction
 import dash_core_components as dcc
 import dash_html_components as html
 import os
 import numpy as np
-import matplotlib.pyplot as plt
-import sys
 import random
 import configparser
 from pymongo import MongoClient
 
+from utils.mongo_utils import get_doc_count
 from utils.visuals import get_spectrogram
 from controls import LABELS
 
@@ -27,13 +22,20 @@ app = dash.Dash(
 )
 
 ## COSMOS DB Connection + PRINTING INFO
-cosmos_client = MongoClient(config["COSMOS"]["URI"])
 database = config["COSMOS"]["DATABASE"]
-collection = config["COSMOS"]["COLLECTION"]
+label_collection = config["COSMOS"]["LABEL_COLLECTION"]
+pred_collection = config["COSMOS"]["PREDICTION_COLLECTION"]
+
+tic = time.time()
+cosmos_client = MongoClient(config["COSMOS"]["URI"])
 
 print("Mongo Connection Successful. Printing Mongo Details ...")
 print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
              for db in cosmos_client.list_database_names()))
+
+pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
+print("[COUNT] Inital DB Count:", pred_db_count)
+print("[Time Taken] ", time.time()-tic)
 
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
@@ -44,6 +46,7 @@ spec_data = get_spectrogram()
 
 app.layout = html.Div(
     [
+        dcc.Interval(id="interval-updating-alert", interval=2000, n_intervals=0),
         html.Div(
             [
                 html.Div(
@@ -119,7 +122,7 @@ app.layout = html.Div(
                         ),
                         html.Br(),
                         html.Audio(
-                            id="player",
+                            id="wav-player",
                             src=FILE,
                             controls=True
                         ),
@@ -212,6 +215,7 @@ app.layout = html.Div(
     ]
 )
 def button_submit(n_clicks, human_labels):
+
     print("================    Button Clicked!! ", n_clicks, "   ==========================")
     ## Handling Initial Use-Case which always gets hit in the beginning
     if n_clicks == 0:
@@ -230,12 +234,38 @@ def button_submit(n_clicks, human_labels):
     	"node": random.randint(1, 6),
     	"labels": final_human_labels
     }
+
     print(labels_doc)
-    cosmos_client[database][collection].insert_one(labels_doc)
+    cosmos_client[database][label_collection].insert_one(labels_doc)
     return html.P("Successfully Submitted your Feedback. Thank You!")
 
 ####  CALLBACK: INTERVAL updating UI according to new sample
+# @app.callback(
+#     [Output("wav-player", "src"), Output("spectrogram", "src"), Output("ai-preds", "value")],
+#     [Input("interval-updating-alert", "n_intervals")],
+# )
+# def interval_alert(n_intervals):
+#     global FILE
+#     global pred_db_count
+#     new_db_count = get_doc_count(cosmos_client[database][pred_collection])
+#
+#
+#     if new_db_count == pred_db_count: ## No ALerts. Keep displaying previous items
+#         print('[A] No Changes ...')
+#         return [FILE, "data:image/png;base64,{}".format(get_spectrogram()), []]
+#     elif new_db_count > pred_db_count:  ## If a new prediction has been added in COSMOS "predictions" DB. RAISE Alert
+#         print('[B] ALERT detected')
+#         pred_db_count = new_db_count
+#         wav_audio = FILE
+#         spec_image = "data:image/png;base64,{}".format(get_spectrogram())
+#         predictions = ["footsteps", "speech"]
+#
+#         return [wav_audio, spec_image, predictions]
+#     print('[C]')
+#     return []
+
+
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
