@@ -2,6 +2,7 @@
 import time
 import dash
 from dash.dependencies import Input, Output, State, ClientsideFunction
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import os
@@ -13,6 +14,7 @@ from pymongo import MongoClient
 from utils.mongo_utils import get_doc_count
 from utils.visuals import get_spectrogram
 from controls import LABELS
+from sidebar import sidebar
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -44,168 +46,173 @@ PATH = "assets/rockstar.mp3"
 
 spec_data = get_spectrogram()
 
+header_layout = html.Div(
+    [
+        html.Div(
+            [
+                html.Img(
+                    src=app.get_asset_url("forest.png"),
+                    id="plotly-image",
+                    style={
+                        "height": "60px",
+                        "width": "auto",
+                        "margin-bottom": "25px",
+                    },
+                )
+            ],
+            className="one-third column",
+        ),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.H3(
+                            "SafeCity Monitoring",
+                            style={"margin-bottom": "0px"},
+                        ),
+                        html.H5(
+                            "Sample SubHeader", style={"margin-top": "0px"}
+                        ),
+                    ]
+                )
+            ],
+            className="one-half column",
+            id="title",
+        ),
+        html.Div(
+            [
+                html.A(
+                    html.Button("GitHub Page", id="learn-more-button"),
+                    href="https://github.com/abdylan/audioAnn_GUI",
+                )
+            ],
+            className="one-third column",
+            id="button",
+        ),
+    ],
+    id="header",
+    className="row flex-display",
+    # style={"margin-bottom": "25px"},
+)
+
+tabs_layout = html.Div(
+    [
+        html.Div(
+            [
+                dcc.Link("Audio Analysis", href="/"),
+                dcc.Link("Event History", href="/"),
+            ],
+            id="tabs",
+            className="row tabs",
+        ),
+    ],
+)
+
+audio_analysis_layout = html.Div(
+    [
+        html.H3(
+            "Audio Data Analysis",
+            className="audio_label"
+        ),
+        html.H6(
+            "Detected Audio Sound",
+            className="audio_label"
+        ),
+        html.Br(),
+        html.Audio(
+            id="wav-player",
+            src=FILE,
+            controls=True
+        ),
+        html.H6(
+            "Audio Graph",
+        ),
+        html.Img(
+            id='spectrogram',
+            src="data:image/png;base64,{}".format(spec_data),
+            style = {"padding":"30px"})
+
+    ],
+    className="eight columns",
+    id="audio_analysis"
+)
+
+audio_labelling_layout = html.Div(
+    [
+        html.H3(
+            "Audio Data Labelling",
+            className="audio_label"
+        ),
+        html.H6(
+            "Predicted Labels",
+        ),
+        html.P(
+            "Labels predicted by AI Model",
+        ),
+        dcc.Dropdown(
+            id="ai-preds",
+            options=label_options,
+            multi=True,
+            value=list(LABELS.keys()),
+            className="dcc_control",
+        ),
+        html.H6(
+            "Label the Audio",
+        ),
+        html.P(
+            "Choose all labels that you feel are present in the audio"
+        ),
+        dcc.Dropdown(
+            id="human-labels",
+            options=label_options,
+            multi=True,
+            # value=list(LABELS.keys()),
+            className="dcc_control",
+        ),
+        html.Span(
+            "Submit",
+            id="submit-sample-button",
+            n_clicks=0,
+            className="button_labels",
+        ),
+        # html.A(
+        #     html.Button("Submit", id="submit-sample-button"),
+        #     href="/",
+        # ),
+        html.Div(children=[],
+            id="button-output"
+        )
+    ],
+    className="five columns",
+    id="audio_label",
+    # style={"padding-top": "0px", "margin-top": "0px"}
+)
+
 app.layout = html.Div(
     [
-        dcc.Interval(id="interval-updating-alert", interval=2000, n_intervals=0),
-        html.Div(
-            [
+        # dcc.Interval(id="interval-updating-alert", interval=2000, n_intervals=0),
+        header_layout,
+        dbc.Col(
+            children=[
+                sidebar,
+                tabs_layout,
                 html.Div(
-                    [
-                        html.Img(
-                            src=app.get_asset_url("forest.png"),
-                            id="plotly-image",
-                            style={
-                                "height": "60px",
-                                "width": "auto",
-                                "margin-bottom": "25px",
-                            },
-                        )
-                    ],
-                    className="one-third column",
-                ),
-                html.Div(
-                    [
+                    id="parent_div",
+                    className="flex-display",
+                    children=[
+                        audio_analysis_layout,
                         html.Div(
-                            [
-                                html.H3(
-                                    "SafeCity Monitoring",
-                                    style={"margin-bottom": "0px"},
-                                ),
-                                html.H5(
-                                    "Sample SubHeader", style={"margin-top": "0px"}
-                                ),
-                            ]
-                        )
+                            id="vertical_line",
+                            className="one columns"
+                        ),
+                        audio_labelling_layout,
                     ],
-                    className="one-half column",
-                    id="title",
-                ),
-                html.Div(
-                    [
-                        html.A(
-                            html.Button("GitHub Page", id="learn-more-button"),
-                            href="https://github.com/abdylan/audioAnn_GUI",
-                        )
-                    ],
-                    className="one-third column",
-                    id="button",
                 ),
             ],
-            id="header",
-            className="row flex-display",
-            # style={"margin-bottom": "25px"},
-        ),
-
-        html.Div(
-            [
-                html.Div(
-                    [
-                        dcc.Link("Audio Analysis", href="/"),
-                        dcc.Link("Event History", href="/"),
-                    ],
-                    id="tabs",
-                    className="row tabs",
-                ),
-            ],
-        ),
-        html.Div(
-            [
-                html.Div(
-                    [
-                        html.H3(
-                            "Audio Data Analysis",
-                            className="audio_label"
-                        ),
-                        html.H6(
-                            "Detected Audio Sound",
-                            className="audio_label"
-                        ),
-                        html.Br(),
-                        html.Audio(
-                            id="wav-player",
-                            src=FILE,
-                            controls=True
-                        ),
-                        html.H6(
-                            "Audio Graph",
-                        ),
-                        html.Img(
-                        	id='spectrogram',
-                        	src="data:image/png;base64,{}".format(spec_data),
-                        	style = {"padding":"30px"})
-                        # dcc.Graph(
-                        #     figure = fig,
-                        #     # id="waveform",
-                        #     # style = {"padding":"30px"}
-                        # )
-                    ],
-                    className="eight columns",
-                    id="audio_analysis"
-                ),
-
-                html.Div(
-                    id="vertical_line",
-                    className="one columns"
-                ),
-                html.Div(
-                    [
-                        html.H3(
-                            "Audio Data Labelling",
-                            className="audio_label"
-                        ),
-                        html.H6(
-                            "Predicted Labels",
-                        ),
-                        html.P(
-                            "Labels predicted by AI Model",
-                        ),
-                        dcc.Dropdown(
-                            id="ai-preds",
-                            options=label_options,
-                            multi=True,
-                            value=list(LABELS.keys()),
-                            className="dcc_control",
-                        ),
-                        html.H6(
-                            "Label the Audio",
-                        ),
-                        html.P(
-                            "Choose all labels that you feel are present in the audio"
-                        ),
-                        dcc.Dropdown(
-                            id="human-labels",
-                            options=label_options,
-                            multi=True,
-                            # value=list(LABELS.keys()),
-                            className="dcc_control",
-                        ),
-                        html.Span(
-                            "Submit",
-                            id="submit-sample-button",
-                            n_clicks=0,
-                            className="button_labels",
-                        ),
-                        # html.A(
-                        #     html.Button("Submit", id="submit-sample-button"),
-                        #     href="/",
-                        # ),
-                        html.Div(children=[],
-                            id="button-output"
-                        )
-                    ],
-                    className="five columns",
-                    id="audio_label",
-                    # style={"padding-top": "0px", "margin-top": "0px"}
-                ),
-            ],
-            id="parent_div",
-            className="flex-display"
-        ),
+        )
     ],
     className="mainContainer",
 )
-
-
 
 @app.callback(
     Output("button-output", "children"),
@@ -264,6 +271,26 @@ def button_submit(n_clicks, human_labels):
 #     print('[C]')
 #     return []
 
+@app.callback(
+    Output("sidebar", "className"),
+    [Input("sidebar-toggle", "n_clicks")],
+    [State("sidebar", "className")],
+)
+def toggle_classname(n, classname):
+    if n and classname == "":
+        return "collapsed"
+    return ""
+
+
+@app.callback(
+    Output("collapse", "is_open"),
+    [Input("navbar-toggle", "n_clicks")],
+    [State("collapse", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 
 
