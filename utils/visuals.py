@@ -3,19 +3,19 @@ import matplotlib.pyplot as plt
 import librosa
 import io
 import numpy as np
-from pydub import AudioSegment
+# from pydub import AudioSegment
 
 def get_spectrogram():
 
 	## Creating SPECTROGRAM from example audio
-	y, sr = librosa.load(librosa.util.example_audio_file())
+	y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
 	plt.figure(figsize=(7, 3))
 	plt.title('Linear-frequency Power Spectrogram')
 	plt.specgram(np.array(y), Fs=sr)
 	plt.axis('off')
 
 	## Converting MatplotLib Plot to Base64 for display
-	## Source: https://stackoverflow.com/questions/49851280/showing-a-simple-matplotlib-plot-in-plotly-dash 
+	## Source: https://stackoverflow.com/questions/49851280/showing-a-simple-matplotlib-plot-in-plotly-dash
 	buf = io.BytesIO() # in-memory files
 	plt.savefig(buf, format="png", bbox_inches='tight') # save to the above file object
 	data = base64.b64encode(buf.getbuffer()).decode("utf8") # encode to html elements
@@ -70,4 +70,3 @@ def seconds_to_MMSS(slider_seconds):
         seconds = "0" + seconds
     MMSS = "{0}:{1}".format(round(minutes), seconds)
     return MMSS
-

@@ -1,10 +1,10 @@
 LABELS = {
-    "001": "Footsteps",
-    "002": "Speech",
-    "003": "Chainsaw",
-    "004": "Axe",
-    "005": "Gunshot",
-    "006": "Rain",
-    "007": "Birds",
-    "008": "Cricket"
+    "footstep": "Footsteps",
+    "speech": "Speech",
+    "chainsaw": "Chainsaw",
+    "axe": "Axe",
+    "gunshot": "Gunshot",
+    "rain": "Rain",
+    "birds": "Birds",
+    "cricket": "Cricket"
 }

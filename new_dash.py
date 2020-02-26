@@ -1,5 +1,4 @@
 # Import required libraries
-import pickle
 import copy
 import pathlib
 import dash
@@ -13,28 +12,30 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-
-from utils.visuals import get_spectrogram
+import random
+import configparser
 from pymongo import MongoClient
 
+from utils.visuals import get_spectrogram
 from controls import LABELS
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
 )
 
 ## COSMOS DB Connection + PRINTING INFO
-cosmos_uri = "mongodb://test-cosmo-forest:PAmUpODh7NUBRUql5zyzi2EdYyTHWWvjFOIeGbmvUTvMspity4lgpT5L69wmrqgmNvgnVMY1QTxxjUIwnjZjiw==@test-cosmo-forest.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@test-cosmo-forest@"
-cosmos_client = MongoClient(cosmos_uri)
+cosmos_client = MongoClient(config["COSMOS"]["URI"])
+database = config["COSMOS"]["DATABASE"]
+collection = config["COSMOS"]["COLLECTION"]
 
 print("Mongo Connection Successful. Printing Mongo Details ...")
 print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
              for db in cosmos_client.list_database_names()))
 
-
-label_options = [
-    {"label": str(LABELS[label]), "value": str(label)} for label in LABELS
-]
+label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
 FILE = "http://localhost:8050/assets/rockstar.mp3"
 PATH = "assets/rockstar.mp3"
@@ -64,11 +65,11 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.H3(
-                                    "Avenging Forests",
+                                    "SafeCity Monitoring",
                                     style={"margin-bottom": "0px"},
                                 ),
                                 html.H5(
-                                    "Revenge for the Forests", style={"margin-top": "0px"}
+                                    "Sample SubHeader", style={"margin-top": "0px"}
                                 ),
                             ]
                         )
@@ -103,9 +104,7 @@ app.layout = html.Div(
                     className="row tabs",
                 ),
             ],
-
         ),
-
         html.Div(
             [
                 html.Div(
@@ -145,7 +144,6 @@ app.layout = html.Div(
                     id="vertical_line",
                     className="one columns"
                 ),
-
                 html.Div(
                     [
                         html.H3(
@@ -159,7 +157,7 @@ app.layout = html.Div(
                             "Labels predicted by AI Model",
                         ),
                         dcc.Dropdown(
-                            id="client_label2",
+                            id="ai-preds",
                             options=label_options,
                             multi=True,
                             value=list(LABELS.keys()),
@@ -172,7 +170,7 @@ app.layout = html.Div(
                             "Choose all labels that you feel are present in the audio"
                         ),
                         dcc.Dropdown(
-                            id="client_label",
+                            id="human-labels",
                             options=label_options,
                             multi=True,
                             # value=list(LABELS.keys()),
@@ -200,32 +198,44 @@ app.layout = html.Div(
             id="parent_div",
             className="flex-display"
         ),
-
     ],
     className="mainContainer",
 )
+
+
 
 @app.callback(
     Output("button-output", "children"),
     [Input("submit-sample-button", "n_clicks")],
     [
-        State("client_label", "value")
+        State("human-labels", "value")
     ]
 )
 def button_submit(n_clicks, human_labels):
-    print("Button Clicked!! ", n_clicks)
-    print(human_labels)
+    print("================    Button Clicked!! ", n_clicks, "   ==========================")
+    ## Handling Initial Use-Case which always gets hit in the beginning
+    if n_clicks == 0:
+        return []
+
+    ## Use-Case: User enters no labels when pressing submit
+    if human_labels is None:
+        return html.P("Error! Please choose options from above")
 
     ## Submit Labels + Meta to Cosmos DB
+    final_human_labels = ";".join([lab for lab in human_labels])
+    print("[0] Labels Submitted:", final_human_labels)
+    labels_doc = {
+    	"id" : "1",
+    	"wav_name": "4D-0-0.wav",
+    	"node": random.randint(1, 6),
+    	"labels": final_human_labels
+    }
+    print(labels_doc)
+    cosmos_client[database][collection].insert_one(labels_doc)
+    return html.P("Successfully Submitted your Feedback. Thank You!")
 
-    dummy_text = html.P("Submitted Labels!!")
-    return dummy_text
+####  CALLBACK: INTERVAL updating UI according to new sample
 
-#
-# app.css.append_css({
-#     "external_url":"https://codepen.io/chriddyp/pen/bWLwgP.css"
-#
-# })
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
