@@ -15,12 +15,21 @@ import matplotlib.pyplot as plt
 import sys
 
 from utils.visuals import get_spectrogram
-import 
+from pymongo import MongoClient
 
 from controls import LABELS
+
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
 )
+
+## COSMOS DB Connection + PRINTING INFO
+cosmos_uri = "mongodb://test-cosmo-forest:PAmUpODh7NUBRUql5zyzi2EdYyTHWWvjFOIeGbmvUTvMspity4lgpT5L69wmrqgmNvgnVMY1QTxxjUIwnjZjiw==@test-cosmo-forest.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@test-cosmo-forest@"
+cosmos_client = MongoClient(cosmos_uri)
+
+print("Mongo Connection Successful. Printing Mongo Details ...")
+print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
+             for db in cosmos_client.list_database_names()))
 
 
 label_options = [
@@ -29,7 +38,6 @@ label_options = [
 
 FILE = "http://localhost:8050/assets/rockstar.mp3"
 PATH = "assets/rockstar.mp3"
-
 
 spec_data = get_spectrogram()
 
