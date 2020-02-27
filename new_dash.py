@@ -19,8 +19,9 @@ from sidebar import sidebar
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-app = dash.Dash(
-    __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
+app = dash.Dash(__name__,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}]
 )
 
 ## COSMOS DB Connection + PRINTING INFO
@@ -28,16 +29,16 @@ database = config["COSMOS"]["DATABASE"]
 label_collection = config["COSMOS"]["LABEL_COLLECTION"]
 pred_collection = config["COSMOS"]["PREDICTION_COLLECTION"]
 
-tic = time.time()
-cosmos_client = MongoClient(config["COSMOS"]["URI"])
-
-print("Mongo Connection Successful. Printing Mongo Details ...")
-print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
-             for db in cosmos_client.list_database_names()))
-
-pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
-print("[COUNT] Inital DB Count:", pred_db_count)
-print("[Time Taken] ", time.time()-tic)
+# tic = time.time()
+# cosmos_client = MongoClient(config["COSMOS"]["URI"])
+#
+# print("Mongo Connection Successful. Printing Mongo Details ...")
+# print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
+#              for db in cosmos_client.list_database_names()))
+#
+# pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
+# print("[COUNT] Inital DB Count:", pred_db_count)
+# print("[Time Taken] ", time.time()-tic)
 
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
@@ -192,20 +193,14 @@ app.layout = html.Div(
     [
         # dcc.Interval(id="interval-updating-alert", interval=2000, n_intervals=0),
         header_layout,
-        dbc.Col(
+        # tabs_layout,
+        dbc.Container(id="info-container",
             children=[
-                sidebar,
-                tabs_layout,
-                html.Div(
-                    id="parent_div",
-                    className="flex-display",
+                dbc.Row(
                     children=[
-                        audio_analysis_layout,
-                        html.Div(
-                            id="vertical_line",
-                            className="one columns"
-                        ),
-                        audio_labelling_layout,
+                        dbc.Col(sidebar, className="columnus"), #, width={"size": 3, "offset": 0, "order": 1}),
+                        dbc.Col(audio_analysis_layout, width="auto"), #, className="flex-display", id="parent_div", width={"size": 4, "offset": 0, "order": 3}),
+                        dbc.Col(audio_labelling_layout), #, className="flex-display", width={"size": 4, "offset": 0, "order": "last"})
                     ],
                 ),
             ],
@@ -213,6 +208,23 @@ app.layout = html.Div(
     ],
     className="mainContainer",
 )
+
+"""
+dbc.Col(
+    html.Div(
+        id="parent_div",
+        className="flex-display",
+        children=[
+            audio_analysis_layout,
+            html.Div(
+                id="vertical_line",
+                className="one columns"
+            ),
+            audio_labelling_layout,
+        ],
+    ),
+),
+"""
 
 @app.callback(
     Output("button-output", "children"),
@@ -243,7 +255,7 @@ def button_submit(n_clicks, human_labels):
     }
 
     print(labels_doc)
-    cosmos_client[database][label_collection].insert_one(labels_doc)
+    # cosmos_client[database][label_collection].insert_one(labels_doc)
     return html.P("Successfully Submitted your Feedback. Thank You!")
 
 ####  CALLBACK: INTERVAL updating UI according to new sample
@@ -270,28 +282,6 @@ def button_submit(n_clicks, human_labels):
 #         return [wav_audio, spec_image, predictions]
 #     print('[C]')
 #     return []
-
-@app.callback(
-    Output("sidebar", "className"),
-    [Input("sidebar-toggle", "n_clicks")],
-    [State("sidebar", "className")],
-)
-def toggle_classname(n, classname):
-    if n and classname == "":
-        return "collapsed"
-    return ""
-
-
-@app.callback(
-    Output("collapse", "is_open"),
-    [Input("navbar-toggle", "n_clicks")],
-    [State("collapse", "is_open")],
-)
-def toggle_collapse(n, is_open):
-    if n:
-        return not is_open
-    return is_open
-
 
 
 if __name__ == '__main__':

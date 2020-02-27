@@ -21,51 +21,17 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-# app = dash.Dash(
-#     external_stylesheets=[dbc.themes.BOOTSTRAP],
-#     # these meta_tags ensure content is scaled correctly on different devices
-#     # see: https://www.w3schools.com/css/css_rwd_viewport.asp for more
-#     meta_tags=[
-#         {"name": "viewport", "content": "width=device-width, initial-scale=1"}
-#     ],
-# )
 
 # we use the Row and Col components to construct the sidebar header
 # it consists of a title, and a toggle, the latter is hidden on large screens
-sidebar_header = dbc.Row(
+sidebar_header = html.Div(
     [
-        dbc.Col(html.H2("Alerts", className="display-4")),
-        dbc.Col(
-            [
-                html.Button(
-                    # use the Bootstrap navbar-toggler classes to style
-                    html.Span(className="navbar-toggler-icon"),
-                    className="navbar-toggler",
-                    # the navbar-toggler classes don't set color
-                    style={
-                        "color": "rgba(0,0,0,.5)",
-                        "border-color": "rgba(0,0,0,.1)",
-                    },
-                    id="navbar-toggle",
-                ),
-                html.Button(
-                    # use the Bootstrap navbar-toggler classes to style
-                    html.Span(className="navbar-toggler-icon"),
-                    className="navbar-toggler",
-                    # the navbar-toggler classes don't set color
-                    style={
-                        "color": "rgba(0,0,0,.5)",
-                        "border-color": "rgba(0,0,0,.1)",
-                    },
-                    id="sidebar-toggle",
-                ),
-            ],
+        html.H2("Alerts", className="display-4"),
             # the column containing the toggle will be only as wide as the
             # toggle, resulting in the toggle being right aligned
-            width="auto",
+            # width="auto"## width={"size": 3, "offset": 0, "order": 1}, # auto/True
             # vertically align the toggle in the center
-            align="center",
-        ),
+            # align="center",
     ]
 )
 
@@ -78,15 +44,14 @@ sidebar = html.Div(
             [
                 html.Hr(),
                 html.P(
-                    "A responsive sidebar layout with collapsible navigation "
-                    "links.",
-                    className="lead",
+                    "Alerts will be shown below as they occur in Real-Time",
+                    className="alert-text",
                 ),
             ],
             id="blurb",
         ),
         # use the Collapse component to animate hiding / revealing links
-        dbc.Collapse(
+        html.Div(
             dbc.Nav(
                 [
                     dbc.NavLink("Alert 1", href="/alert-1", id="alert-1-link"),
@@ -96,12 +61,21 @@ sidebar = html.Div(
                 vertical=True,
                 pills=True,
             ),
-            id="collapse",
+            id="alert-queue",
         ),
     ],
     id="sidebar",
 )
 
-# content = html.Div(id="page-content")
+if __name__ == '__main__':
+    app = dash.Dash(
+        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        # these meta_tags ensure content is scaled correctly on different devices
+        # see: https://www.w3schools.com/css/css_rwd_viewport.asp for more
+        meta_tags=[
+            {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+        ],
+    )
 
-# app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+    app.layout = sidebar
+    app.run_server(debug=True)
