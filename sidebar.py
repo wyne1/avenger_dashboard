@@ -54,12 +54,13 @@ sidebar = html.Div(
         html.Div(
             dbc.Nav(
                 [
-                    dbc.NavLink("Alert 1", href="/alert-1", id="alert-1-link"),
+                    dbc.NavLink("Alert 1", href="/alert-1", id="alert-1-link", active=True),
                     dbc.NavLink("Alert 2", href="/alert-2", id="alert-2-link"),
-                    dbc.NavLink("Alert 3", href="/alert-3", id="alert-3-link"),
                 ],
                 vertical=True,
                 pills=True,
+                justified=True,
+                id="current_queue"
             ),
             id="alert-queue",
         ),

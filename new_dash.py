@@ -1,10 +1,13 @@
 # Import required libraries
+from pprint import pprint
+import traceback
 import time
 import dash
 from dash.dependencies import Input, Output, State, ClientsideFunction
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.exceptions import PreventUpdate
 import os
 import numpy as np
 import random
@@ -23,6 +26,7 @@ app = dash.Dash(__name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}]
 )
+server = app.server
 
 ## COSMOS DB Connection + PRINTING INFO
 database = config["COSMOS"]["DATABASE"]
@@ -39,6 +43,7 @@ pred_collection = config["COSMOS"]["PREDICTION_COLLECTION"]
 # pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
 # print("[COUNT] Inital DB Count:", pred_db_count)
 # print("[Time Taken] ", time.time()-tic)
+pred_db_count = 0
 
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
@@ -177,6 +182,7 @@ audio_labelling_layout = html.Div(
             className="button_labels",
         ),
         # html.A(
+
         #     html.Button("Submit", id="submit-sample-button"),
         #     href="/",
         # ),
@@ -189,10 +195,24 @@ audio_labelling_layout = html.Div(
     # style={"padding-top": "0px", "margin-top": "0px"}
 )
 
+alert_toast = dbc.Toast(
+            "Please check out from Sidebar",
+            id="alert-popup",
+            header="ALERT !!",
+            is_open=True,
+            dismissable=True,
+            icon="danger",
+            duration=10000,
+            # top: 66 positions the toast below the navbar
+            style={"position": "fixed", "top": 20, "right": 10, "width": 550},
+        )
+
 app.layout = html.Div(
     [
-        # dcc.Interval(id="interval-updating-alert", interval=2000, n_intervals=0),
+        dcc.Interval(id="interval-updating-alert", interval=5000, n_intervals=0),
+        dcc.Location(id="url"),
         header_layout,
+        alert_toast,
         # tabs_layout,
         dbc.Container(id="info-container",
             children=[
@@ -204,28 +224,115 @@ app.layout = html.Div(
                     ],
                 ),
             ],
-        )
+        ),
     ],
     className="mainContainer",
 )
 
-"""
-dbc.Col(
-    html.Div(
-        id="parent_div",
-        className="flex-display",
-        children=[
-            audio_analysis_layout,
-            html.Div(
-                id="vertical_line",
-                className="one columns"
-            ),
-            audio_labelling_layout,
-        ],
-    ),
-),
-"""
+#########    NAVLINK: ALERT Item Click    ################
+def find_alert_press(current_q, find_uri):
+    target_idx, target_item = -1, None
+    final_q = []
 
+    for i, item in enumerate(current_q):
+        if find_uri in item["props"].values():
+            target_idx = i
+            item["props"]["active"] = True
+            target_item = item
+            final_q.append(item)
+        else:
+            item["props"]["active"] = False
+            final_q.append(item)
+
+    return target_idx, final_q
+
+@app.callback(
+    [Output("current_queue", "children"), Output("ai-preds", "value")],
+    [Input("url", "pathname")],
+    [State("current_queue", "children")])
+def alert_item_button(url_path, current_q):
+    """
+    1) Change LINK Active Status
+    2) Update Alert Details (WAV, Spec, ai-preds)
+
+    """
+    print("ALERT Item PRESSED: ", url_path)
+
+    target_idx, final_q = find_alert_press(current_q, url_path)
+
+    if target_idx == -1:
+        print("Target URL not FOUND!")
+        return [current_q, ["cricket", "birds"]]
+    else:
+        return [final_q, ["footstep", "speech"]]
+
+
+
+#########  INTERVAL: Updating UI according to new sample  ############
+def append_alert_queue(alert_queue, alert_num):
+    length_alert_queue = len(alert_queue["props"]["children"])
+    new_queue_alert = {'props': {'children': 'Alert {}'.format(alert_num),
+            'id': 'alert-{}-link'.format(alert_num), 'href': '/alert-{}'.format(alert_num)
+            }, 'type': 'NavLink', 'namespace': 'dash_bootstrap_components/_components'}
+    alert_queue["props"]["children"].append(new_queue_alert)
+    return alert_queue
+
+@app.callback(
+    [Output("alert-popup", "is_open"), Output("alert-queue", "children")],
+    [Input("interval-updating-alert", "n_intervals")],
+    [
+        State("current_queue", "children"),
+        State("alert-queue", "children")
+    ]
+)
+def interval_alert(n_intervals, current_queue, alert_queue):
+    """
+    Tasks involced:
+    1. Ping Azure For New Predictions/Alerts
+    2. RETURN
+        i)  Alert Pop-Up
+        ii) Navigation Bar Queue - APPEND ONLY
+            If new alert, then we APPEND item to Sidebar Queue
+            and reeturn the ENTIRE Queue
+    """
+    if n_intervals is None:
+        raise PreventUpdate
+
+    global FILE
+    global pred_db_count
+
+    print("Polling Interval:", n_intervals)
+    current_q_len = len(current_queue)
+
+    try:
+        # new_db_count = get_doc_count(cosmos_client[database][pred_collection])
+        if n_intervals % 50 == 0: # Nothing changed --> Return input argument as it is
+            alert_queue = append_alert_queue(alert_queue, n_intervals)
+            return [True, alert_queue]
+        else:
+            raise PreventUpdate
+    except:
+        print(traceback.print_exc())
+        raise PreventUpdate
+
+
+    """
+    if new_db_count == pred_db_count: ## No ALerts. Keep displaying previous items
+        print('[A] No Changes ...')
+        return [True]
+    elif new_db_count > pred_db_count:  ## If a new prediction has been added in COSMOS "predictions" DB. RAISE Alert
+        print('[B] ALERT detected')
+        pred_db_count = new_db_count
+
+        return [False]
+    print('[C]')
+    return []
+    """
+
+
+
+
+###########     BUTTON: Human Labels Submit    ##############
 @app.callback(
     Output("button-output", "children"),
     [Input("submit-sample-button", "n_clicks")],
@@ -234,11 +341,12 @@ dbc.Col(
     ]
 )
 def button_submit(n_clicks, human_labels):
-
-    print("================    Button Clicked!! ", n_clicks, "   ==========================")
     ## Handling Initial Use-Case which always gets hit in the beginning
-    if n_clicks == 0:
+    if n_clicks is None:
+        raise PreventUpdate
+    elif n_clicks == 0:
         return []
+    print("================    Button Clicked!! ", n_clicks, "   ==========================")
 
     ## Use-Case: User enters no labels when pressing submit
     if human_labels is None:
@@ -258,30 +366,6 @@ def button_submit(n_clicks, human_labels):
     # cosmos_client[database][label_collection].insert_one(labels_doc)
     return html.P("Successfully Submitted your Feedback. Thank You!")
 
-####  CALLBACK: INTERVAL updating UI according to new sample
-# @app.callback(
-#     [Output("wav-player", "src"), Output("spectrogram", "src"), Output("ai-preds", "value")],
-#     [Input("interval-updating-alert", "n_intervals")],
-# )
-# def interval_alert(n_intervals):
-#     global FILE
-#     global pred_db_count
-#     new_db_count = get_doc_count(cosmos_client[database][pred_collection])
-#
-#
-#     if new_db_count == pred_db_count: ## No ALerts. Keep displaying previous items
-#         print('[A] No Changes ...')
-#         return [FILE, "data:image/png;base64,{}".format(get_spectrogram()), []]
-#     elif new_db_count > pred_db_count:  ## If a new prediction has been added in COSMOS "predictions" DB. RAISE Alert
-#         print('[B] ALERT detected')
-#         pred_db_count = new_db_count
-#         wav_audio = FILE
-#         spec_image = "data:image/png;base64,{}".format(get_spectrogram())
-#         predictions = ["footsteps", "speech"]
-#
-#         return [wav_audio, spec_image, predictions]
-#     print('[C]')
-#     return []
 
 
 if __name__ == '__main__':
