@@ -17,13 +17,15 @@ from pymongo import MongoClient
 from utils.mongo_utils import get_doc_count
 from utils.visuals import get_spectrogram
 from controls import LABELS
-from sidebar import sidebar
+from utils.sidebar import sidebar
+import datetime as dt
+from utils.helpers import append_alertDB
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 app = dash.Dash(__name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/brPBPO.css'],
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}]
 )
 server = app.server
@@ -267,14 +269,14 @@ def alert_item_button(url_path, current_q):
         return [final_q, ["footstep", "speech"]]
 
 
-
 #########  INTERVAL: Updating UI according to new sample  ############
-def append_alert_queue(alert_queue, alert_num):
+def append_alert_queue(alert_queue, timestamp, date):
     length_alert_queue = len(alert_queue["props"]["children"])
-    new_queue_alert = {'props': {'children': 'Alert {}'.format(alert_num),
-            'id': 'alert-{}-link'.format(alert_num), 'href': '/alert-{}'.format(alert_num)
+    new_queue_alert = {'props': {'children': '{}'.format(timestamp),
+            'id': 'alert-{}-link'.format(timestamp), 'href': '/{}'.format(timestamp)
             }, 'type': 'NavLink', 'namespace': 'dash_bootstrap_components/_components'}
     alert_queue["props"]["children"].append(new_queue_alert)
+    print("[QUEUE] APPENED New ALert to Queue")
     return alert_queue
 
 @app.callback(
@@ -306,13 +308,26 @@ def interval_alert(n_intervals, current_queue, alert_queue):
 
     try:
         # new_db_count = get_doc_count(cosmos_client[database][pred_collection])
-        if n_intervals % 50 == 0: # Nothing changed --> Return input argument as it is
-            alert_queue = append_alert_queue(alert_queue, n_intervals)
+
+        ## ALERT !!
+        if (n_intervals % 50 == 0) & (n_intervals != 0):
+            timestamp = dt.datetime.today()
+            date = timestamp.strftime('%d-%m-%Y')
+            timestamp = timestamp.strftime("Time-%H-%M-%S")
+            node = 5
+            alert_queue = append_alert_queue(alert_queue, timestamp, date)
+            append_alertDB(node, timestamp, date)
+
             return [True, alert_queue]
-        else:
+
+        else:                           # Nothing changed --> Return input argument as it is
             raise PreventUpdate
-    except:
-        print(traceback.print_exc())
+
+    except dash.exceptions.PreventUpdate:
+        pass
+    except Exception as ex:
+        print("TRACEBACK:", traceback.print_exc())
+    finally:
         raise PreventUpdate
 
 
@@ -328,9 +343,6 @@ def interval_alert(n_intervals, current_queue, alert_queue):
     print('[C]')
     return []
     """
-
-
-
 
 ###########     BUTTON: Human Labels Submit    ##############
 @app.callback(
@@ -369,4 +381,5 @@ def button_submit(n_clicks, human_labels):
 
 
 if __name__ == '__main__':
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     app.run_server(debug=True)

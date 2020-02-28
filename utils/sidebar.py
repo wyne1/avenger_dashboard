@@ -20,13 +20,14 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+from utils.helpers import initialize_alert_navigation
 
 
 # we use the Row and Col components to construct the sidebar header
 # it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = html.Div(
     [
-        html.H2("Alerts", className="display-4"),
+        html.H2("Alerts", className="display-4", style={"align": "center"}),
             # the column containing the toggle will be only as wide as the
             # toggle, resulting in the toggle being right aligned
             # width="auto"## width={"size": 3, "offset": 0, "order": 1}, # auto/True
@@ -53,10 +54,11 @@ sidebar = html.Div(
         # use the Collapse component to animate hiding / revealing links
         html.Div(
             dbc.Nav(
-                [
-                    dbc.NavLink("Alert 1", href="/alert-1", id="alert-1-link", active=True),
-                    dbc.NavLink("Alert 2", href="/alert-2", id="alert-2-link"),
-                ],
+                initialize_alert_navigation(),
+                # [
+                #     dbc.NavLink("Alert 1", href="/alert-1", id="alert-1-link", active=True),
+                #     dbc.NavLink("Alert 2", href="/alert-2", id="alert-2-link"),
+                # ],
                 vertical=True,
                 pills=True,
                 justified=True,
