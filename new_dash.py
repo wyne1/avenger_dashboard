@@ -8,6 +8,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.exceptions import PreventUpdate
+from dash import no_update
 import os
 import numpy as np
 import random
@@ -19,7 +20,7 @@ from utils.visuals import get_spectrogram
 from controls import LABELS
 from utils.sidebar import sidebar
 import datetime as dt
-from utils.helpers import append_alertDB
+from utils.helpers import append_alertDB_row, remove_alertDB_row, initialize_alert_navigation
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -119,11 +120,11 @@ tabs_layout = html.Div(
 audio_analysis_layout = html.Div(
     [
         html.H3(
-            "Audio Data Analysis",
+            "Data Analysis",
             className="audio_label"
         ),
         html.H6(
-            "Detected Audio Sound",
+            "Detected Data",
             className="audio_label"
         ),
         html.Br(),
@@ -178,8 +179,14 @@ audio_labelling_layout = html.Div(
             className="dcc_control",
         ),
         html.Span(
-            "Submit",
+            "ALERT",
             id="submit-sample-button",
+            n_clicks=0,
+            className="button_labels",
+        ),
+        html.Span(
+            "Benign",
+            id="benign-sample-button",
             n_clicks=0,
             className="button_labels",
         ),
@@ -270,7 +277,7 @@ def alert_item_button(url_path, current_q):
 
 
 #########  INTERVAL: Updating UI according to new sample  ############
-def append_alert_queue(alert_queue, timestamp, date):
+def append_alert_queue(alert_queue, timestamp):
     length_alert_queue = len(alert_queue["props"]["children"])
     new_queue_alert = {'props': {'children': '{}'.format(timestamp),
             'id': 'alert-{}-link'.format(timestamp), 'href': '/{}'.format(timestamp)
@@ -284,18 +291,21 @@ def append_alert_queue(alert_queue, timestamp, date):
     [Input("interval-updating-alert", "n_intervals")],
     [
         State("current_queue", "children"),
-        State("alert-queue", "children")
+        State("alert-queue", "children"),
     ]
 )
 def interval_alert(n_intervals, current_queue, alert_queue):
     """
     Tasks involced:
-    1. Ping Azure For New Predictions/Alerts
-    2. RETURN
-        i)  Alert Pop-Up
-        ii) Navigation Bar Queue - APPEND ONLY
-            If new alert, then we APPEND item to Sidebar Queue
-            and reeturn the ENTIRE Queue
+    (A) COSMOS ADD
+        1. Ping Azure For New Predictions/Alerts
+        2. RETURN
+            i)  Alert Pop-Up
+            ii) Navigation Bar Queue - APPEND ONLY
+                If new alert, then we APPEND item to Sidebar Queue
+                and reeturn the ENTIRE Queue
+    (B) REFRESH from CSV
+        1. Save Active State of current item in Queue
     """
     if n_intervals is None:
         raise PreventUpdate
@@ -306,31 +316,57 @@ def interval_alert(n_intervals, current_queue, alert_queue):
     print("Polling Interval:", n_intervals)
     current_q_len = len(current_queue)
 
-    try:
-        # new_db_count = get_doc_count(cosmos_client[database][pred_collection])
+    # try:
+    # new_db_count = get_doc_count(cosmos_client[database][pred_collection])
 
-        ## ALERT !!
-        if (n_intervals % 50 == 0) & (n_intervals != 0):
-            timestamp = dt.datetime.today()
-            date = timestamp.strftime('%d-%m-%Y')
-            timestamp = timestamp.strftime("Time-%H-%M-%S")
-            node = 5
-            alert_queue = append_alert_queue(alert_queue, timestamp, date)
-            append_alertDB(node, timestamp, date)
+    ## COSMOS ALERT !!
+    if (n_intervals % 100 == 0): # & (n_intervals != 0):
+        timestamp = dt.datetime.today()
+        name = timestamp.strftime("Time-%H:%M:%S")
+        timestamp = str(timestamp)[:19]
+        node = 5
 
-            return [True, alert_queue]
+        tic=time.time()
+        append_alertDB_row(node, timestamp, name)
+        print("[TIME] APPEND Alert to CSV:", time.time()-tic)
+        update_queue = True
+        print("[1] FOUND ALERT!!")
+        return [True, alert_queue]
 
-        else:                           # Nothing changed --> Return input argument as it is
-            raise PreventUpdate
-
-    except dash.exceptions.PreventUpdate:
-        pass
-    except Exception as ex:
-        print("TRACEBACK:", traceback.print_exc())
-    finally:
-        raise PreventUpdate
+    ##  Frequent Update of LINKS
+    elif (n_intervals % 2 == 0):
+        print("[1] UPDATING Queue Naturally ...")
+        print(current_queue)
 
 
+        updated_div = dbc.Nav(
+            initialize_alert_navigation(),
+            # [
+            #     dbc.NavLink("Alert 1", href="/alert-1", id="alert-1-link", active=True),
+            #     dbc.NavLink("Alert 2", href="/alert-2", id="alert-2-link"),
+            # ],
+            vertical=True,
+            pills=True,
+            justified=True,
+            id="current_queue"
+        )
+        # updated_queue = initialize_alert_navigation()
+        print("[2] Updating Queue")
+
+        return [False, [updated_div]]
+
+    else:
+        print("[3] NO Interval Update")
+        return [False, no_update]
+
+    print("[-99] WHAT NOW!!")
+    # except dash.exceptions.PreventUpdate:
+    #     pass
+    # except Exception as ex:
+    #     print("TRACEBACK:", traceback.print_exc())
+    #     raise PreventUpdate
+
+    # print(">> WHAT NOW !!")
     """
     if new_db_count == pred_db_count: ## No ALerts. Keep displaying previous items
         print('[A] No Changes ...')
@@ -346,37 +382,46 @@ def interval_alert(n_intervals, current_queue, alert_queue):
 
 ###########     BUTTON: Human Labels Submit    ##############
 @app.callback(
-    Output("button-output", "children"),
+    [Output("button-output", "children"), Output("url", "pathname")],
     [Input("submit-sample-button", "n_clicks")],
     [
-        State("human-labels", "value")
+        State("human-labels", "value"),
+        State("url", "pathname"),
+        State("current_queue", "children")
     ]
 )
-def button_submit(n_clicks, human_labels):
+def button_submit(n_clicks, human_labels, url, current_queue):
     ## Handling Initial Use-Case which always gets hit in the beginning
     if n_clicks is None:
         raise PreventUpdate
     elif n_clicks == 0:
-        return []
+        raise PreventUpdate
     print("================    Button Clicked!! ", n_clicks, "   ==========================")
 
     ## Use-Case: User enters no labels when pressing submit
     if human_labels is None:
-        return html.P("Error! Please choose options from above")
+        return [html.P("Error! Please choose options from above"), no_update]
+
+    if "alert" in url:
+        current_alert = url.split("alert-")[-1]
+    print("Current URL:", current_alert)
 
     ## Submit Labels + Meta to Cosmos DB
     final_human_labels = ";".join([lab for lab in human_labels])
     print("[0] Labels Submitted:", final_human_labels)
     labels_doc = {
-    	"id" : "1",
-    	"wav_name": "4D-0-0.wav",
-    	"node": random.randint(1, 6),
-    	"labels": final_human_labels
+        "id" : "1",
+        "wav_name": "4D-0-0.wav",
+        "node": random.randint(1, 6),
+        "labels": final_human_labels
     }
 
+    remove_alertDB_row(current_alert)
+
     print(labels_doc)
+    print(current_queue)
     # cosmos_client[database][label_collection].insert_one(labels_doc)
-    return html.P("Successfully Submitted your Feedback. Thank You!")
+    return [html.P("Successfully Submitted your Feedback. Thank You!"), "/alert-Time-16:00:52"]
 
 
 
