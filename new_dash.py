@@ -21,6 +21,7 @@ from controls import LABELS
 from utils.sidebar import sidebar
 import datetime as dt
 from utils.helpers import append_alertDB_row, remove_alertDB_row, initialize_alert_navigation
+from utils.global_utils import visualize_voice_graph
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -54,6 +55,7 @@ FILE = "http://localhost:8050/assets/rockstar.mp3"
 PATH = "assets/rockstar.mp3"
 
 spec_data = get_spectrogram()
+speech_data = visualize_voice_graph([0,1,4,6], duration=10)
 
 header_layout = html.Div(
     [
@@ -139,7 +141,13 @@ audio_analysis_layout = html.Div(
         html.Img(
             id='spectrogram',
             src="data:image/png;base64,{}".format(spec_data),
-            style = {"padding":"30px"})
+            style = {"padding":"30px"}
+        ),
+        html.Img(
+            id='speech-graph',
+            src="data:image/png;base64,{}".format(speech_data),
+            style = {"padding":"30px"}
+        )
 
     ],
     className="eight columns",
@@ -292,9 +300,10 @@ def append_alert_queue(alert_queue, timestamp):
     [
         State("current_queue", "children"),
         State("alert-queue", "children"),
+        State("url", "pathname"),
     ]
 )
-def interval_alert(n_intervals, current_queue, alert_queue):
+def interval_alert(n_intervals, current_queue, alert_queue, url_path):
     """
     Tasks involced:
     (A) COSMOS ADD
@@ -313,14 +322,19 @@ def interval_alert(n_intervals, current_queue, alert_queue):
     global FILE
     global pred_db_count
 
-    print("Polling Interval:", n_intervals)
+    print("======  Polling Interval:", n_intervals)
     current_q_len = len(current_queue)
 
-    # try:
-    # new_db_count = get_doc_count(cosmos_client[database][pred_collection])
+    """
+    new_db_count = get_doc_count(cosmos_client[database][pred_collection])
+    if new_db_count == pred_db_count: ## No ALerts. Keep displaying previous items
+        print('[A] No Changes ...')
+        return [True]
+    """
 
     ## COSMOS ALERT !!
     if (n_intervals % 100 == 0): # & (n_intervals != 0):
+        print("[1] ALERT !!")
         timestamp = dt.datetime.today()
         name = timestamp.strftime("Time-%H:%M:%S")
         timestamp = str(timestamp)[:19]
@@ -335,23 +349,19 @@ def interval_alert(n_intervals, current_queue, alert_queue):
 
     ##  Frequent Update of LINKS
     elif (n_intervals % 2 == 0):
-        print("[1] UPDATING Queue Naturally ...")
-        print(current_queue)
+        print("[2] UPDATING Queue Naturally ...")
 
-
+        target_idx, _ = find_alert_press(current_queue, url_path)
+        print('Active IDX:', target_idx)
         updated_div = dbc.Nav(
-            initialize_alert_navigation(),
-            # [
-            #     dbc.NavLink("Alert 1", href="/alert-1", id="alert-1-link", active=True),
-            #     dbc.NavLink("Alert 2", href="/alert-2", id="alert-2-link"),
-            # ],
+            initialize_alert_navigation(active=target_idx),
             vertical=True,
             pills=True,
             justified=True,
             id="current_queue"
         )
         # updated_queue = initialize_alert_navigation()
-        print("[2] Updating Queue")
+        # print("[2] Updating Queue")
 
         return [False, [updated_div]]
 
@@ -367,20 +377,26 @@ def interval_alert(n_intervals, current_queue, alert_queue):
     #     raise PreventUpdate
 
     # print(">> WHAT NOW !!")
-    """
-    if new_db_count == pred_db_count: ## No ALerts. Keep displaying previous items
-        print('[A] No Changes ...')
-        return [True]
-    elif new_db_count > pred_db_count:  ## If a new prediction has been added in COSMOS "predictions" DB. RAISE Alert
-        print('[B] ALERT detected')
-        pred_db_count = new_db_count
 
-        return [False]
-    print('[C]')
-    return []
-    """
 
 ###########     BUTTON: Human Labels Submit    ##############
+def find_next_alert(current_q, target_url):
+    target_idx, next_url = -1, "/"
+    len_alert_queue = len(current_q)
+
+    for i, item in enumerate(current_q):
+        if target_url == item["props"]["href"]:
+            print("\t FOUND NEXT ALERT: ", i, len_alert_queue, target_url, item["props"]["href"])
+            if i < len_alert_queue-1:
+                target_idx = i + 1
+                next_url = current_q[i+1]["props"]['href']
+            elif i == len_alert_queue-1:
+                target_idx = i - 1
+                next_url = current_q[i-1]["props"]['href']
+
+
+    return target_idx, next_url
+
 @app.callback(
     [Output("button-output", "children"), Output("url", "pathname")],
     [Input("submit-sample-button", "n_clicks")],
@@ -406,6 +422,9 @@ def button_submit(n_clicks, human_labels, url, current_queue):
         current_alert = url.split("alert-")[-1]
     print("Current URL:", current_alert)
 
+    target_idx, next_url = find_next_alert(current_queue, url)
+    print(target_idx, next_url)
+
     ## Submit Labels + Meta to Cosmos DB
     final_human_labels = ";".join([lab for lab in human_labels])
     print("[0] Labels Submitted:", final_human_labels)
@@ -415,13 +434,13 @@ def button_submit(n_clicks, human_labels, url, current_queue):
         "node": random.randint(1, 6),
         "labels": final_human_labels
     }
+    # cosmos_client[database][label_collection].insert_one(labels_doc)
 
     remove_alertDB_row(current_alert)
 
     print(labels_doc)
-    print(current_queue)
-    # cosmos_client[database][label_collection].insert_one(labels_doc)
-    return [html.P("Successfully Submitted your Feedback. Thank You!"), "/alert-Time-16:00:52"]
+
+    return [html.P("Successfully Submitted your Feedback. Thank You!"), next_url]
 
 
 

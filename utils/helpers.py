@@ -13,7 +13,7 @@ def initialize_alert_navigation(active=None):
 
     alert_df = pd.read_csv('alert_db.csv')
     print("Loaded Queue DF | Shape: {}".format(alert_df.shape))
-
+    print("Current Active IDX:", active, type(active))
     alert_links = []
     for idx, row in alert_df.iterrows():
     # for key in alert_db.keys():
@@ -21,11 +21,14 @@ def initialize_alert_navigation(active=None):
         name = "Alert {}".format(row_name)
         href = "/alert-{}".format(row_name)
         alert_id = "alert-{}-link".format(row_name)
-        active = False
-        if (active is not None) & (active == href):
-            active = True
+        active_value = False
+        # print("[DEBUG] Idx: {}  | Href: {}  |  Name: {}".format(idx, href, name))
+        # print("\tIF COND", (isinstance(active, int)), (active is idx))
+        if (isinstance(active, int)) & (active is idx):
+            # print("\tFOUND active IDX")
+            active_value = True
         if not row["marked"]:
-            alert_links.append(dbc.NavLink(name, href=href, id=alert_id, active=active))
+            alert_links.append(dbc.NavLink(name, href=href, id=alert_id, active=active_value))
 
     return alert_links
 
