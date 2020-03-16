@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.gridspec as gridspec
 import io
 import base64
+from datetime import datetime, timezone
 
 # frame
 # n_window = int(sample_rate * 4. / frames * 2) - 4 * 2
@@ -132,8 +133,6 @@ def vis_spectral_centroids(audio, sr):
     #Plotting the Spectral Centroid along the waveform
     librosa.display.waveplot(audio, sr=sr, alpha=0.4)
     plt.plot(t, normalize(spectral_centroids), color='r')
-
-
 
 def get_labels(path):
     with open(path+'/labels.txt') as txt:

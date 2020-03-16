@@ -3,6 +3,8 @@ from pprint import pprint
 import csv
 import time
 import pandas as pd
+import librosa
+from datetime import datetime
 
 def initialize_alert_navigation(active=None):
     """
@@ -46,3 +48,16 @@ def remove_alertDB_row(sample_timestamp):
     with open("alert_db.csv", "w") as alert_db:
         alert_db.writelines(final_data)
     print("[TIME] Remove Completed CSV Sample: {:.4f} sec".format(time.time()-tic))
+
+def extract_alert_data(doc):
+    y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
+    print("\t DOC:", doc)
+    timestamp = datetime.fromtimestamp(int(doc["timestamp"]))
+    name = timestamp.strftime("Time-%H:%M:%S")
+    timestamp = str(timestamp)[:19]
+    node = doc["node"]
+    wav_fname = doc["wav_fname"]
+    speech_times = doc["speech_pred"]
+    footstep_pred = doc["footstep_pred"]
+
+    return node, timestamp, name

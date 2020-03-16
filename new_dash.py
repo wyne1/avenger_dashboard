@@ -15,13 +15,16 @@ import random
 import configparser
 from pymongo import MongoClient
 
-from utils.mongo_utils import get_doc_count
+from utils.mongo_utils import get_doc_count, get_alert_doc
 from utils.visuals import get_spectrogram
 from controls import LABELS
 from utils.sidebar import sidebar
 import datetime as dt
-from utils.helpers import append_alertDB_row, remove_alertDB_row, initialize_alert_navigation
+from utils.helpers import append_alertDB_row, remove_alertDB_row, initialize_alert_navigation, extract_alert_data
 from utils.global_utils import visualize_voice_graph
+from flask_caching import Cache
+from threading import Lock
+
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -31,23 +34,32 @@ app = dash.Dash(__name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}]
 )
 server = app.server
+CACHE_CONFIG = {
+    # try 'filesystem' if you don't want to setup redis
+    'CACHE_TYPE': 'redis',
+    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
+}
+cache = Cache()
+cache.init_app(server, config=CACHE_CONFIG)
+
+lock = Lock()
 
 ## COSMOS DB Connection + PRINTING INFO
 database = config["COSMOS"]["DATABASE"]
 label_collection = config["COSMOS"]["LABEL_COLLECTION"]
 pred_collection = config["COSMOS"]["PREDICTION_COLLECTION"]
 
-# tic = time.time()
-# cosmos_client = MongoClient(config["COSMOS"]["URI"])
-#
-# print("Mongo Connection Successful. Printing Mongo Details ...")
-# print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
-#              for db in cosmos_client.list_database_names()))
-#
-# pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
-# print("[COUNT] Inital DB Count:", pred_db_count)
-# print("[Time Taken] ", time.time()-tic)
-pred_db_count = 0
+tic = time.time()
+cosmos_client = MongoClient(config["COSMOS"]["URI"])
+
+print("Mongo Connection Successful. Printing Mongo Details ...")
+print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
+             for db in cosmos_client.list_database_names()))
+
+pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
+print("[COUNT] Inital DB Count:", pred_db_count)
+print("[Time Taken] ", time.time()-tic)
+pred_db_count = 3
 
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
@@ -55,7 +67,7 @@ FILE = "http://localhost:8050/assets/rockstar.mp3"
 PATH = "assets/rockstar.mp3"
 
 spec_data = get_spectrogram()
-speech_data = visualize_voice_graph([0,1,4,6], duration=10)
+speech_data = visualize_voice_graph([1, 2, 6, 7.5], duration=10)
 
 header_layout = html.Div(
     [
@@ -333,18 +345,29 @@ def interval_alert(n_intervals, current_queue, alert_queue, url_path):
     """
 
     ## COSMOS ALERT !!
-    if (n_intervals % 100 == 0): # & (n_intervals != 0):
-        print("[1] ALERT !!")
-        timestamp = dt.datetime.today()
-        name = timestamp.strftime("Time-%H:%M:%S")
-        timestamp = str(timestamp)[:19]
-        node = 5
+    new_db_count = get_doc_count(cosmos_client[database][pred_collection])
+    if new_db_count > pred_db_count: ## No ALerts. Keep displaying previous items
+    # if (n_intervals % 100 == 0): # & (n_intervals != 0):
+        num_new_samples = new_db_count - pred_db_count
+        print("[1] ALERT !!  # New Samples: {}".format(num_new_samples))
+
+        alert_docs = get_alert_doc(cosmos_client[database][pred_collection], num_new_samples)
 
         tic=time.time()
-        append_alertDB_row(node, timestamp, name)
+        # alert_doc = []
+        for doc in alert_docs:
+            node, timestamp, name = sample_data = extract_alert_data(doc)
+
+            # timestamp = dt.datetime.today()
+            # name = timestamp.strftime("Time-%H:%M:%S")
+            # timestamp = str(timestamp)[:19]
+            # node = 5
+            append_alertDB_row(node, timestamp, name)
+            with lock:
+                pred_db_count = new_db_count
+
         print("[TIME] APPEND Alert to CSV:", time.time()-tic)
-        update_queue = True
-        print("[1] FOUND ALERT!!")
+
         return [True, alert_queue]
 
     ##  Frequent Update of LINKS
@@ -446,4 +469,4 @@ def button_submit(n_clicks, human_labels, url, current_queue):
 
 if __name__ == '__main__':
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    app.run_server(debug=True)
+    app.run_server(debug=False)
