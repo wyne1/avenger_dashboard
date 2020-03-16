@@ -4,3 +4,4 @@ dash_examples/
 __pycache__/
 *.pyc
 config.ini
+.idea/
