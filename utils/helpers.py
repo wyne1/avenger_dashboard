@@ -49,15 +49,16 @@ def remove_alertDB_row(sample_timestamp):
         alert_db.writelines(final_data)
     print("[TIME] Remove Completed CSV Sample: {:.4f} sec".format(time.time()-tic))
 
-def extract_alert_data(doc):
+def extract_alert_data(input_doc):
     y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
-    print("\t DOC:", doc)
-    timestamp = datetime.fromtimestamp(int(doc["timestamp"]))
-    name = timestamp.strftime("Time-%H:%M:%S")
-    timestamp = str(timestamp)[:19]
-    node = doc["node"]
-    wav_fname = doc["wav_fname"]
-    speech_times = doc["speech_pred"]
-    footstep_pred = doc["footstep_pred"]
+    print("\t INPUT Doc:", input_doc)
+    doc = {}
+    timestamp = datetime.fromtimestamp(int(input_doc["timestamp"]))
+    doc['name'] = timestamp.strftime("Time-%H:%M:%S")
+    doc['timestamp'] = str(timestamp)[:19]
+    doc['node'] = input_doc["node"]
+    doc['wav_fname'] = input_doc["wav_fname"]
+    doc['speech_times'] = input_doc["speech_pred"]
+    doc['footstep_pred'] = input_doc["footstep_pred"]
 
-    return node, timestamp, name
+    return doc

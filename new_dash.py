@@ -25,6 +25,8 @@ from utils.global_utils import visualize_voice_graph
 from flask_caching import Cache
 from threading import Lock
 
+from utils.blob_storage import init_azure_storage, download_blob
+
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -57,9 +59,17 @@ print(dict((db, [collection for collection in cosmos_client[db].list_collection_
              for db in cosmos_client.list_database_names()))
 
 pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
-print("[COUNT] Inital DB Count:", pred_db_count)
-print("[Time Taken] ", time.time()-tic)
+print("[-2] Time Taken ", time.time()-tic)
+print("\t[COUNT] Inital DB Count:", pred_db_count)
 pred_db_count = 3
+
+tic = time.time()
+RESOURCE_GROUP = config['BLOB']['RESOURCE_GROUP']
+STORAGE_ACCOUNT = config['BLOB']['STORAGE_ACCOUNT']
+ACCOUNT_KEY = config['BLOB']['ACCOUNT_KEY']
+CONNECTION_STR = config['BLOB']['CONNECTION_STRING']
+az_storage_client = init_azure_storage(RESOURCE_GROUP, STORAGE_ACCOUNT, ACCOUNT_KEY, method='sas')
+print("[-1] Time Taken init_azure_storage() {:.4f} sec".format(time.time()-tic))
 
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
@@ -353,20 +363,18 @@ def interval_alert(n_intervals, current_queue, alert_queue, url_path):
 
         alert_docs = get_alert_doc(cosmos_client[database][pred_collection], num_new_samples)
 
-        tic=time.time()
         # alert_doc = []
         for doc in alert_docs:
-            node, timestamp, name = sample_data = extract_alert_data(doc)
+            doc = sample_data = extract_alert_data(doc)
+            wav = download_blob(az_storage_client, 'temp_cont', doc['wav_fname'])
 
             # timestamp = dt.datetime.today()
             # name = timestamp.strftime("Time-%H:%M:%S")
             # timestamp = str(timestamp)[:19]
             # node = 5
-            append_alertDB_row(node, timestamp, name)
+            append_alertDB_row(doc['node'], doc[['timestamp']], doc['name'])
             with lock:
                 pred_db_count = new_db_count
-
-        print("[TIME] APPEND Alert to CSV:", time.time()-tic)
 
         return [True, alert_queue]
 
