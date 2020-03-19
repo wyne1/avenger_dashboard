@@ -14,13 +14,14 @@ import numpy as np
 import random
 import configparser
 from pymongo import MongoClient
+import librosa
 
 from utils.mongo_utils import get_doc_count, get_alert_doc
 from utils.visuals import get_spectrogram
 from controls import LABELS
 from utils.sidebar import sidebar
 import datetime as dt
-from utils.helpers import append_alertDB_row, remove_alertDB_row, initialize_alert_navigation, extract_alert_data
+from utils.helpers import append_alertDB_row, remove_alertDB_row, initialize_alert_navigation, extract_alert_data, final_alert_press
 from utils.global_utils import visualize_voice_graph
 from flask_caching import Cache
 from threading import Lock
@@ -41,8 +42,8 @@ CACHE_CONFIG = {
     'CACHE_TYPE': 'redis',
     'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
 }
-cache = Cache()
-cache.init_app(server, config=CACHE_CONFIG)
+# cache = Cache()
+# cache.init_app(server, config=CACHE_CONFIG)
 
 lock = Lock()
 
@@ -61,7 +62,7 @@ print(dict((db, [collection for collection in cosmos_client[db].list_collection_
 pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
 print("[-2] Time Taken ", time.time()-tic)
 print("\t[COUNT] Inital DB Count:", pred_db_count)
-pred_db_count = 3
+pred_db_count = 6
 
 tic = time.time()
 RESOURCE_GROUP = config['BLOB']['RESOURCE_GROUP']
@@ -74,9 +75,8 @@ print("[-1] Time Taken init_azure_storage() {:.4f} sec".format(time.time()-tic))
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
 FILE = "http://localhost:8050/assets/rockstar.mp3"
-PATH = "assets/rockstar.mp3"
 
-spec_data = get_spectrogram()
+spec_data, duration = get_spectrogram(None)
 speech_data = visualize_voice_graph([1, 2, 6, 7.5], duration=10)
 
 header_layout = html.Div(
@@ -163,12 +163,12 @@ audio_analysis_layout = html.Div(
         html.Img(
             id='spectrogram',
             src="data:image/png;base64,{}".format(spec_data),
-            style = {"padding":"30px"}
+            style={"padding":"30px"}
         ),
         html.Img(
             id='speech-graph',
             src="data:image/png;base64,{}".format(speech_data),
-            style = {"padding":"30px"}
+            style={"padding":"30px"}
         )
 
     ],
@@ -286,9 +286,10 @@ def find_alert_press(current_q, find_uri):
     return target_idx, final_q
 
 @app.callback(
-    [Output("current_queue", "children"), Output("ai-preds", "value")],
+    [Output("current_queue", "children"), Output("ai-preds", "value"), Output("wav-player", "src"), Output("spectrogram", "src"), Output("speech-graph", "src")],
     [Input("url", "pathname")],
-    [State("current_queue", "children")])
+    [State("current_queue", "children")]
+)
 def alert_item_button(url_path, current_q):
     """
     1) Change LINK Active Status
@@ -296,14 +297,30 @@ def alert_item_button(url_path, current_q):
 
     """
     print("ALERT Item PRESSED: ", url_path)
-
+    if "alert" in url_path:
+        current_alert = url_path.split("alert-")[-1]
+    print("Current FNAME:", current_alert)
     target_idx, final_q = find_alert_press(current_q, url_path)
 
-    if target_idx == -1:
-        print("Target URL not FOUND!")
-        return [current_q, ["cricket", "birds"]]
-    else:
-        return [final_q, ["footstep", "speech"]]
+    try:
+        if target_idx == -1:
+            print("Target URL not FOUND!")
+            ai_preds = ["cricket", "birds"]
+            return [current_q, no_update, no_update, no_update, no_update]
+        else:
+            wav_fname, ai_preds, speech_times = final_alert_press(current_alert)
+            wav_path = "assets/{}".format(wav_fname)
+            # print("DEBUG isFile:", os.listdir("http://localhost:8050/assets"))
+
+            spec_data, duration = get_spectrogram(wav_path)
+            print("\tGOT SPECTROGRAM", len(spec_data))
+            speech_data = visualize_voice_graph(speech_times, duration=duration)
+            print("\tGOT Speech Graph", len(speech_data))
+            return [final_q, ai_preds, "http://localhost:8050/assets/{}".format(wav_fname), spec_data, speech_data]
+    except:
+        print(traceback.print_exc())
+        raise PreventUpdate
+        
 
 
 #########  INTERVAL: Updating UI according to new sample  ############
@@ -341,10 +358,9 @@ def interval_alert(n_intervals, current_queue, alert_queue, url_path):
     if n_intervals is None:
         raise PreventUpdate
 
-    global FILE
     global pred_db_count
 
-    print("======  Polling Interval:", n_intervals)
+    print("===================     Polling Interval:", n_intervals, "   ===================")
     current_q_len = len(current_queue)
 
     """
@@ -365,14 +381,18 @@ def interval_alert(n_intervals, current_queue, alert_queue, url_path):
 
         # alert_doc = []
         for doc in alert_docs:
-            doc = sample_data = extract_alert_data(doc)
-            wav = download_blob(az_storage_client, 'temp_cont', doc['wav_fname'])
+            doc = extract_alert_data(doc)
+            print("Returning DOC:", doc)
+            wav = download_blob(az_storage_client, 'temp-cont', doc['wav_fname'])
+            with open('assets/{}'.format(doc['wav_fname']), "wb") as my_blob:
+                my_blob.write(wav)
 
             # timestamp = dt.datetime.today()
             # name = timestamp.strftime("Time-%H:%M:%S")
             # timestamp = str(timestamp)[:19]
             # node = 5
-            append_alertDB_row(doc['node'], doc[['timestamp']], doc['name'])
+
+            append_alertDB_row(doc['node'], doc['timestamp'], doc['name'], doc['wav_fname'], doc['footstep_pred'], doc['speech_times'])
             with lock:
                 pred_db_count = new_db_count
 
@@ -477,4 +497,4 @@ def button_submit(n_clicks, human_labels, url, current_queue):
 
 if __name__ == '__main__':
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    app.run_server(debug=False)
+    app.run_server(debug=True)

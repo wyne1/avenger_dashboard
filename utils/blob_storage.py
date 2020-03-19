@@ -78,8 +78,8 @@ def download_blob(az_storage_client, container, blob_name):
 
 	print('\t [B] Reading Blob')
 	wav = download_stream.readall()
-	# with open('temp.wav', "wb") as my_blob:
-	# 	my_blob.write(wav)
+	with open('temp.wav', "wb") as my_blob:
+		my_blob.write(wav)
 	print("\t[Time Taken] Download & Read Blob: {:.4f} sec".format(time.time() - tic))
 	return wav
 

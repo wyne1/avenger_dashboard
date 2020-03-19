@@ -34,10 +34,10 @@ def initialize_alert_navigation(active=None):
 
     return alert_links
 
-def append_alertDB_row(node, timestamp, name):
+def append_alertDB_row(node, timestamp, name, wav_fname, footstep_pred, speech_times):
     with open('alert_db.csv', mode='a') as alert_file:
         alert_writer = csv.writer(alert_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        alert_writer.writerow([timestamp, node, False, False, name])
+        alert_writer.writerow([timestamp, node, False, False, name, wav_fname, footstep_pred, speech_times])
 
 def remove_alertDB_row(sample_timestamp):
     print("Removing Sample:", sample_timestamp)
@@ -49,8 +49,22 @@ def remove_alertDB_row(sample_timestamp):
         alert_db.writelines(final_data)
     print("[TIME] Remove Completed CSV Sample: {:.4f} sec".format(time.time()-tic))
 
+def final_alert_press(alert_uri):
+    alert_df = pd.read_csv('alert_db.csv')
+    result = alert_df[alert_df['name'] == alert_uri]
+    if len(result) == 0:
+        return None, None, None
+    print("[DEBUG] result:", result)
+    wav_fname = result['wav_fname'].values[0]
+    footstep_pred = result['footstep_pred'].values[0]
+    footstep_pred = [x for x in footstep_pred.split(';')]
+    speech_times = result['speech_times'].values[0]
+    speech_times = [int(x) for x in speech_times.split(' ')]
+
+    return wav_fname, footstep_pred, speech_times
+
 def extract_alert_data(input_doc):
-    y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
+    # y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
     print("\t INPUT Doc:", input_doc)
     doc = {}
     timestamp = datetime.fromtimestamp(int(input_doc["timestamp"]))
@@ -58,7 +72,8 @@ def extract_alert_data(input_doc):
     doc['timestamp'] = str(timestamp)[:19]
     doc['node'] = input_doc["node"]
     doc['wav_fname'] = input_doc["wav_fname"]
-    doc['speech_times'] = input_doc["speech_pred"]
+
+    doc['speech_times'] = " ".join([str(x) for x in input_doc["speech_pred"]])
     doc['footstep_pred'] = input_doc["footstep_pred"]
 
     return doc
