@@ -16,6 +16,7 @@ import sys
 import random
 import configparser
 from pymongo import MongoClient
+import dash_table
 
 from dash.dependencies import Input, Output
 from plotly import graph_objs as go
@@ -144,36 +145,11 @@ app.layout = html.Div(
         html.Div(
             className="row",
             children=[
-
-                html.Div(
-                    className="div-for-charts bg-grey",
-                    children=[
-                        html.Div(
-                            className="text-padding",
-                            children=[
-                                "Events in Every Node"
-                            ],
-                        ),
-                        # dcc.Graph(
-                        #     id="histogram1",
-                        #     figure={
-                        #         'data': [
-                        #             {'x': node_list, 'y': node_freq, 'type': 'bar', 'name': 'SF'}
-                        #         ],
-                        #         'layout': layout
-                        #     }
-                        #
-                        # ),
-                        go.Figure(
-                            data = [
-                                go.Bar(x=node_list, y=node_freq, marker=dict(color = "#207D32")),
-                            ],
-                        ),
-
-
-                    ],
+                dash_table.DataTable(
+                    id = 'table',
+                    columns = [{"name": i, "id": i} for i in df1.columns],
+                    data = df1[:10].to_dict('rows'),
                 ),
-
             ],
         ),
     ],

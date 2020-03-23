@@ -16,7 +16,7 @@ import sys
 import random
 import configparser
 from pymongo import MongoClient
-
+import dash_table
 from dash.dependencies import Input, Output
 from plotly import graph_objs as go
 from plotly.graph_objs import *
@@ -175,8 +175,19 @@ app.layout = html.Div(
                 # Four Columns
                 html.Div(
                     className="six columns div-user-controls",
-                    # children=[
-                    #     ],
+                    children=[
+                        html.Div(
+                            className="row",
+                            children=[
+                                html.H4("Latest Event History"),
+                                dash_table.DataTable(
+                                    id = 'table',
+                                    columns = [{"name": i, "id": i} for i in df1.columns],
+                                    data = df1[:12].to_dict('rows'),
+                                ),
+                            ],
+                        ),
+                    ],
                 ),
                 html.Div(
                     className="six columns div-for-charts bg-grey",

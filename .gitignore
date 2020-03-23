@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 config.ini
 *.csv
+*.html
+*.txt
