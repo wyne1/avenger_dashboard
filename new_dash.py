@@ -24,6 +24,7 @@ from controls import LABELS
 from utils.sidebar import sidebar
 import datetime as dt
 from utils.helpers import append_alertDB_row, remove_alertDB_row, initialize_alert_navigation, extract_alert_data, final_alert_press
+from utils.helpers import generate_markdown_text
 from utils.global_utils import visualize_voice_graph
 # from flask_caching import Cache
 from threading import Lock
@@ -145,13 +146,10 @@ tabs_layout = html.Div(
 
 audio_analysis_layout = html.Div(
     [
-        html.H3(
-            "Data Analysis",
-            className="audio_label"
-        ),
-        html.H6(
-            "Detected Data",
-            className="audio_label"
+        dcc.Markdown(
+            generate_markdown_text(5, "2020-01-11 16:43"),
+            className="audio_label",
+            id="alert-markdown"
         ),
         html.Br(),
         html.Audio(
@@ -288,7 +286,8 @@ def find_alert_press(current_q, find_uri):
     return target_idx, final_q
 
 @app.callback(
-    [Output("current_queue", "children"), Output("ai-preds", "value"), Output("wav-player", "src"), Output("spectrogram", "src"), Output("speech-graph", "src")],
+    [Output("current_queue", "children"), Output("ai-preds", "value"), Output("wav-player", "src"), 
+        Output("spectrogram", "src"), Output("speech-graph", "src"), Output("alert-markdown", "children")],
     [Input("url", "pathname")],
     [State("current_queue", "children")]
 )
@@ -309,9 +308,9 @@ def alert_item_button(url_path, current_q):
         if target_idx == -1:
             print("Target URL not FOUND!")
             ai_preds = ["cricket", "birds"]
-            return [current_q, no_update, no_update, no_update, no_update]
+            return [current_q, no_update, no_update, no_update, no_update, no_update]
         else:
-            wav_fname, ai_preds, speech_times = final_alert_press(current_alert)
+            wav_fname, ai_preds, speech_times, node = final_alert_press(current_alert)
             print("\t[DEBUG 2]: ", wav_fname, ai_preds, speech_times)
             wav_path = "assets/{}".format(wav_fname)
             wav_src_path = "http://localhost:8050/assets/{}".format(wav_fname)
@@ -321,7 +320,7 @@ def alert_item_button(url_path, current_q):
             print("\tGOT SPECTROGRAM", len(spec_data))
             speech_data = visualize_voice_graph(speech_times, duration=duration)
             print("\tGOT Speech Graph", len(speech_data))
-            return [final_q, ai_preds, wav_src_path, spec_data, speech_data]
+            return [final_q, ai_preds, wav_src_path, spec_data, speech_data, generate_markdown_text(node, "00:00:00")]
     except:
         print(traceback.print_exc())
         raise PreventUpdate
@@ -377,7 +376,7 @@ def interval_alert(n_intervals, current_queue, alert_queue, url_path):
 
     ## COSMOS ALERT !!
     new_db_count = get_doc_count(cosmos_client[database][pred_collection])
-    if new_db_count > pred_db_count: ## No ALerts. Keep displaying previous items
+    if new_db_count > pred_db_count: 
     # if (n_intervals % 100 == 0): # & (n_intervals != 0):
         num_new_samples = new_db_count - pred_db_count
         print("[1] ALERT !!  # New Samples: {}".format(num_new_samples))
@@ -421,6 +420,7 @@ def interval_alert(n_intervals, current_queue, alert_queue, url_path):
 
         return [False, [updated_div]]
 
+    ## No ALerts. Keep displaying previous items
     else:
         print("[3] NO Interval Update")
         return [False, no_update]
@@ -482,21 +482,22 @@ def button_submit(n_clicks, human_labels, url, current_queue):
     target_idx, next_url = find_next_alert(current_queue, url)
     print(target_idx, next_url)
 
+    wav_fname, _, _, node = final_alert_press(current_alert)
+
     ## Submit Labels + Meta to Cosmos DB
     final_human_labels = ";".join([lab for lab in human_labels])
     print("[0] Labels Submitted:", final_human_labels)
     labels_doc = {
-        "id" : "1",
-        "wav_name": "4D-0-0.wav",
-        "node": random.randint(1, 6),
+        # "id" : "1",
+        "wav_name": wav_fname,
+        "node": node,
         "labels": final_human_labels
     }
-    # cosmos_client[database][label_collection].insert_one(labels_doc)
-
+    cosmos_client[database][label_collection].insert_one(labels_doc)
     remove_alertDB_row(current_alert)
+    # Todo: REMOVE wav_fname WAV file
 
     print(labels_doc)
-
     return [html.P("Successfully Submitted your Feedback. Thank You!"), next_url]
 
 

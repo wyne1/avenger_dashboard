@@ -55,16 +55,18 @@ def final_alert_press(alert_uri):
     if len(result) == 0:
         return None, None, None
     # print("\t[DEBUG 1] result:", result)
+
+    node = result['node'].values[0]
+
     wav_fname = result['wav_fname'].values[0]
     footstep_pred = result['footstep_pred'].values[0]
     footstep_pred = [x for x in footstep_pred.split(';')]
     speech_times = result['speech_times'].values[0]
     speech_times = [int(x) for x in speech_times.split(' ')]
 
-    return wav_fname, footstep_pred, speech_times
+    return wav_fname, footstep_pred, speech_times, node
 
 def extract_alert_data(input_doc):
-    # y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
     print("\t INPUT Doc:", input_doc)
     doc = {}
     timestamp = datetime.fromtimestamp(int(input_doc["timestamp"]))
@@ -77,3 +79,13 @@ def extract_alert_data(input_doc):
     doc['footstep_pred'] = input_doc["footstep_pred"]
 
     return doc
+
+def generate_markdown_text(node, timestamp,):
+    markdown = """
+    ## Data Analysis
+    #### WARNING! Please verify Alert
+    - **Node:** {}
+    - **Time:** {}
+    """.format(node, timestamp)
+
+    return markdown
