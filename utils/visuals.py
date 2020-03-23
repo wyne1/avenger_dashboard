@@ -6,8 +6,8 @@ import numpy as np
 # from pydub import AudioSegment
 
 def get_spectrogram(wav_path=None):
-    ## Creating SPECTROGRAM from example audio
     if wav_path == None:
+        ## Creating SPECTROGRAM from example audio
         y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
     else:
         y, sr = librosa.load(wav_path, sr=16000)
@@ -22,9 +22,12 @@ def get_spectrogram(wav_path=None):
     ## Source: https://stackoverflow.com/questions/49851280/showing-a-simple-matplotlib-plot-in-plotly-dash
     buf = io.BytesIO() # in-memory files
     plt.savefig(buf, format="png", bbox_inches='tight') # save to the above file object
-    data = base64.b64encode(buf.getbuffer()).decode("utf8") # encode to html elements
+    src_data = base64.b64encode(buf.getbuffer()).decode("utf8") # encode to html elements
     plt.close()
-    return data, duration
+
+    src_data = "data:image/png;base64,{}".format(src_data)
+    print("\t 5: Encoded Image as byte file")
+    return src_data, duration
 
 def generate_plot(step=1):
     # podcast = AudioSegment.from_mp3(PATH)

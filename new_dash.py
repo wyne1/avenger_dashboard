@@ -15,6 +15,8 @@ import random
 import configparser
 from pymongo import MongoClient
 import librosa
+import matplotlib
+matplotlib.use('Agg')
 
 from utils.mongo_utils import get_doc_count, get_alert_doc
 from utils.visuals import get_spectrogram
@@ -23,7 +25,7 @@ from utils.sidebar import sidebar
 import datetime as dt
 from utils.helpers import append_alertDB_row, remove_alertDB_row, initialize_alert_navigation, extract_alert_data, final_alert_press
 from utils.global_utils import visualize_voice_graph
-from flask_caching import Cache
+# from flask_caching import Cache
 from threading import Lock
 
 from utils.blob_storage import init_azure_storage, download_blob
@@ -74,9 +76,9 @@ print("[-1] Time Taken init_azure_storage() {:.4f} sec".format(time.time()-tic))
 
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
-FILE = "http://localhost:8050/assets/rockstar.mp3"
+FILE = "http://127.0.0.1:8050/assets/temp.wav"
 
-spec_data, duration = get_spectrogram(None)
+spec_data, duration = get_spectrogram("assets/temp.wav")
 speech_data = visualize_voice_graph([1, 2, 6, 7.5], duration=10)
 
 header_layout = html.Div(
@@ -296,27 +298,30 @@ def alert_item_button(url_path, current_q):
     2) Update Alert Details (WAV, Spec, ai-preds)
 
     """
-    print("ALERT Item PRESSED: ", url_path)
-    if "alert" in url_path:
-        current_alert = url_path.split("alert-")[-1]
-    print("Current FNAME:", current_alert)
-    target_idx, final_q = find_alert_press(current_q, url_path)
-
     try:
+        print("ALERT Item PRESSED: ", url_path)
+        current_alert = None
+        if "alert" in url_path:
+            current_alert = url_path.split("alert-")[-1]
+        print("Current FNAME:", current_alert)
+        target_idx, final_q = find_alert_press(current_q, url_path)
+
         if target_idx == -1:
             print("Target URL not FOUND!")
             ai_preds = ["cricket", "birds"]
             return [current_q, no_update, no_update, no_update, no_update]
         else:
             wav_fname, ai_preds, speech_times = final_alert_press(current_alert)
+            print("\t[DEBUG 2]: ", wav_fname, ai_preds, speech_times)
             wav_path = "assets/{}".format(wav_fname)
+            wav_src_path = "http://localhost:8050/assets/{}".format(wav_fname)
             # print("DEBUG isFile:", os.listdir("http://localhost:8050/assets"))
 
             spec_data, duration = get_spectrogram(wav_path)
             print("\tGOT SPECTROGRAM", len(spec_data))
             speech_data = visualize_voice_graph(speech_times, duration=duration)
             print("\tGOT Speech Graph", len(speech_data))
-            return [final_q, ai_preds, "http://localhost:8050/assets/{}".format(wav_fname), spec_data, speech_data]
+            return [final_q, ai_preds, wav_src_path, spec_data, speech_data]
     except:
         print(traceback.print_exc())
         raise PreventUpdate
@@ -469,6 +474,7 @@ def button_submit(n_clicks, human_labels, url, current_queue):
     if human_labels is None:
         return [html.P("Error! Please choose options from above"), no_update]
 
+    current_alert = None
     if "alert" in url:
         current_alert = url.split("alert-")[-1]
     print("Current URL:", current_alert)
@@ -497,4 +503,4 @@ def button_submit(n_clicks, human_labels, url, current_queue):
 
 if __name__ == '__main__':
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    app.run_server(debug=True)
+    app.run_server(debug=True, threaded=True)

@@ -54,7 +54,7 @@ def final_alert_press(alert_uri):
     result = alert_df[alert_df['name'] == alert_uri]
     if len(result) == 0:
         return None, None, None
-    print("[DEBUG] result:", result)
+    # print("\t[DEBUG 1] result:", result)
     wav_fname = result['wav_fname'].values[0]
     footstep_pred = result['footstep_pred'].values[0]
     footstep_pred = [x for x in footstep_pred.split(';')]

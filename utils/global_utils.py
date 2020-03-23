@@ -57,9 +57,11 @@ def visualize_voice_graph(dc_timer, duration, title="DUMMY", draw_verticles=True
 
     buf = io.BytesIO() # in-memory files
     plt.savefig(buf, format="png", bbox_inches='tight') # save to the above file object
-    data = base64.b64encode(buf.getbuffer()).decode("utf8") # encode to html elements
+    src_data = base64.b64encode(buf.getbuffer()).decode("utf8") # encode to html elements
     plt.close()
-    return data
+
+    src_data = "data:image/png;base64,{}".format(src_data)
+    return src_data
 
 def vis_spectrogram(audio, sr):
     plt.figure(figsize=(14, 5))
