@@ -4,5 +4,11 @@ dash_examples/
 __pycache__/
 *.pyc
 config.ini
+<<<<<<< HEAD
 .idea/
 *.wav
+=======
+*.csv
+*.html
+*.txt
+>>>>>>> master

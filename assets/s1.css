@@ -51,6 +51,37 @@
   box-sizing: border-box;
 }
 
+
+.indicators {
+  display: flex;
+  align-items: stretch;
+}
+
+.indicator {
+  flex: 1;
+  padding: 0.75rem 1.75rem;
+  text-align: center;
+}
+
+.indicator_value {
+  font-size: 2rem;
+  margin: 1rem 0;
+}
+
+.indicator_value p {
+  margin: 1rem 0;
+}
+/* 
+#lead_grid > .indicators {
+  -ms-grid-row: 2;
+  -ms-grid-row-span: 1;
+  grid-row: 2 / 3;
+  -ms-grid-column: 3;
+  -ms-grid-column-span: 4;
+  grid-column: 3 / 7;
+} */
+
+
 /* For devices larger than 400px */
 @media (min-width: 400px) {
   .container {
