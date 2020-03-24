@@ -19,7 +19,7 @@ from utils.visuals import get_spectrogram
 from controls import LABELS
 from utils.sidebar import sidebar
 import datetime as dt
-from utils.helpers import append_alertDB
+from utils.helpers import append_alertDB_row
 
 config = configparser.ConfigParser()
 config.read('config.ini')
