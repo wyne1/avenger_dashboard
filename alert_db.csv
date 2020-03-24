@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 timestamp,node,opened,marked,date
 Time-10-39,4,True,False,None
 Time-10-41,4,True,False,None
@@ -26,3 +27,7 @@ Time-20-40-18,5,False,False,23-03-2020
 Time-20-44-28,5,False,False,23-03-2020
 Time-21-32-12,5,False,False,24-03-2020
 Time-21-36-22,5,False,False,24-03-2020
+=======
+timestamp,node,opened,marked,name,wav_fname,footstep_pred,speech_times
+2020-01-11 16:43:19,3,False,False,Time-16:43:19,5-1578255814.wav,footsteps;axe,0 1 5 9
+>>>>>>> f3af17c897c0a77b9d26dfcf924f4572d70d13d9

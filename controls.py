@@ -1,5 +1,5 @@
 LABELS = {
-    "footstep": "Footsteps",
+    "footsteps": "Footsteps",
     "speech": "Speech",
     "chainsaw": "Chainsaw",
     "axe": "Axe",

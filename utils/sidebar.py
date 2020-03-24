@@ -22,7 +22,6 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from utils.helpers import initialize_alert_navigation
 
-
 # we use the Row and Col components to construct the sidebar header
 # it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = html.Div(

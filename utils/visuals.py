@@ -5,27 +5,34 @@ import io
 import numpy as np
 # from pydub import AudioSegment
 
-def get_spectrogram():
+def get_spectrogram(wav_path=None):
+    if wav_path == None:
+        ## Creating SPECTROGRAM from example audio
+        y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
+    else:
+        y, sr = librosa.load(wav_path, sr=16000)
+    duration = int(len(y)/sr)
 
-	## Creating SPECTROGRAM from example audio
-	y, sr = librosa.load(librosa.util.example_audio_file(), duration=10)
-	plt.figure(figsize=(7, 3))
-	plt.title('Linear-frequency Power Spectrogram')
-	plt.specgram(np.array(y), Fs=sr)
-	plt.axis('off')
+    plt.figure(figsize=(7, 3))
+    plt.title('Linear-frequency Power Spectrogram')
+    plt.specgram(np.array(y), Fs=sr)
+    plt.axis('off')
 
-	## Converting MatplotLib Plot to Base64 for display
-	## Source: https://stackoverflow.com/questions/49851280/showing-a-simple-matplotlib-plot-in-plotly-dash
-	buf = io.BytesIO() # in-memory files
-	plt.savefig(buf, format="png", bbox_inches='tight') # save to the above file object
-	data = base64.b64encode(buf.getbuffer()).decode("utf8") # encode to html elements
-	plt.close()
-	return data
+    ## Converting MatplotLib Plot to Base64 for display
+    ## Source: https://stackoverflow.com/questions/49851280/showing-a-simple-matplotlib-plot-in-plotly-dash
+    buf = io.BytesIO() # in-memory files
+    plt.savefig(buf, format="png", bbox_inches='tight') # save to the above file object
+    src_data = base64.b64encode(buf.getbuffer()).decode("utf8") # encode to html elements
+    plt.close()
+
+    src_data = "data:image/png;base64,{}".format(src_data)
+    print("\t 5: Encoded Image as byte file")
+    return src_data, duration
 
 def generate_plot(step=1):
-	# podcast = AudioSegment.from_mp3(PATH)
-	# PODCAST_LENGTH = podcast.duration_seconds
-	# PODCAST_INTERVAL = 500
+    # podcast = AudioSegment.from_mp3(PATH)
+    # PODCAST_LENGTH = podcast.duration_seconds
+    # PODCAST_INTERVAL = 500
 
     print(PODCAST_INTERVAL * step, PODCAST_INTERVAL * (step + 1))
     # 5 second interval of podcast
@@ -60,7 +67,7 @@ def generate_plot(step=1):
     #     center=dict(lon=-78.05, lat=42.54),
     #     zoom=7,
     # ),
-	)
+    )
     return fig, layout
 
 def seconds_to_MMSS(slider_seconds):
