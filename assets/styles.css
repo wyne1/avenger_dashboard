@@ -10,117 +10,32 @@ body {
   color: rgb(50, 50, 50);
 }
 
-#mainContainer {
-  display: flex;
-  flex-direction: column;
-}
-
-.flex-display {
-  display: flex;
-  /* flex-direction: row; */
-}
-
-.pretty_container {
-  /* border-radius: 5px; */
-  background-color: #ffffff;
-  margin: 10px;
-  padding: 15px;
-  position: relative;
-  /* box-shadow: 2px 2px 2px lightgrey; */
-}
-
-.two.columns {
-  width: 16.25%;
-}
-
-.column,
-.columns {
-  margin-left: 0.5%;
-}
-
-#parent_div {
-  box-shadow: 1px 1px 2px 2px lightgrey;
-}
-#title {
-  text-align: center;
-}
-
-#waveform {
-  flex: 5;
-  position: relative;
-}
-
-#audio_analysis {
-  /* display: flex;
-  flex-direction: column; */
-  margin: 0;
-  padding: 30px;
-  padding-bottom: 0px;
-  margin-bottom: 0px;
-  width: calc(100%-50px);
-  /* box-shadow: 2px 2px 2px 2px lightgrey; */
-  /* background: #8BFFB9; */
-}
-
-#vertical_line {
-  border-left: 2px solid lightgrey;
-  border-radius: 5px;
-  top: 0;
-}
-
-#audio_label {
-  /* box-shadow: 2px 2px 2px 2px lightgrey; */
-  vertical-align: text-top;
-  display: table;
-  flex-direction: column;
-  margin: 0;
-  padding: 30px;
-  padding-bottom: 0px;
-  margin-bottom: 0px;
-  width: calc(100%-10px);
-  /* background: #8BFFB9; */
-}
-
-#plotly-image {
-  margin-bottom: 0px !important;
-  height: 120px !important;
+.main_div {
+  padding-right: 0;
+  margin-left: 3%;
 }
 
 
-#header {
-  align-items: center;
+
+.audio_analysis {
+  width: 100%;
 }
 
-#player {
-  /* width: calc(80%-30px); */
-
+.audio_label_col {
+  width: 100%;
 }
 
-.js-plotly-plot .plotly .modebar {
-  padding-top: 5%;
-  margin-right: 3.5%;
+#audio_row {
+  align-items: start;
+  margin-top: 50px;
 }
-
 
 #learn-more-button {
   text-align: center;
   height: 100%;
-  padding: 0 20px;
   text-transform: none;
   font-size: 15px;
   float: right;
-  margin-right: 10px;
-  margin-top: 30px;
-}
-
-#submit-sample-button {
-  -ms-grid-column: 6;
-  -ms-grid-column-span: 1;
-  grid-column: 6 / 7;
-  -ms-grid-row: 1;
-  -ms-grid-row-span: 1;
-  grid-row: 1 / 2;
-  align-self: end;
-  float: right;
-  margin-top: 30px;
+  padding: 0 20px;
+  margin: 0px;
 }

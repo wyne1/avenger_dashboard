@@ -30,23 +30,6 @@ app = dash.Dash(__name__,
 )
 server = app.server
 
-## COSMOS DB Connection + PRINTING INFO
-database = config["COSMOS"]["DATABASE"]
-label_collection = config["COSMOS"]["LABEL_COLLECTION"]
-pred_collection = config["COSMOS"]["PREDICTION_COLLECTION"]
-
-# tic = time.time()
-# cosmos_client = MongoClient(config["COSMOS"]["URI"])
-#
-# print("Mongo Connection Successful. Printing Mongo Details ...")
-# print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
-#              for db in cosmos_client.list_database_names()))
-#
-# pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
-# print("[COUNT] Inital DB Count:", pred_db_count)
-# print("[Time Taken] ", time.time()-tic)
-pred_db_count = 0
-
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
 FILE = "http://localhost:8050/assets/rockstar.mp3"
@@ -56,51 +39,43 @@ spec_data = get_spectrogram()
 
 header_layout = html.Div(
     [
-        html.Div(
+        dbc.Row(
             [
-                html.Img(
-                    src=app.get_asset_url("forest.png"),
-                    id="plotly-image",
-                    style={
-                        "height": "60px",
-                        "width": "auto",
-                        "margin-bottom": "25px",
-                    },
-                )
-            ],
-            className="one-third column",
-        ),
-        html.Div(
-            [
-                html.Div(
-                    [
-                        html.H3(
-                            "SafeCity Monitoring",
-                            style={"margin-bottom": "0px"},
-                        ),
-                        html.H5(
-                            "Sample SubHeader", style={"margin-top": "0px"}
-                        ),
-                    ]
-                )
-            ],
-            className="one-half column",
-            id="title",
-        ),
-        html.Div(
-            [
-                html.A(
-                    html.Button("GitHub Page", id="learn-more-button"),
-                    href="https://github.com/abdylan/audioAnn_GUI",
-                )
-            ],
-            className="one-third column",
-            id="button",
-        ),
-    ],
-    id="header",
-    className="row flex-display",
-    # style={"margin-bottom": "25px"},
+                dbc.Col(
+                [
+                    html.Img(
+                        src=app.get_asset_url("forest.png"),
+                        id="plotly-image",
+                        style={
+                            "height": "60px",
+                            "width": "auto",
+                            "margin-bottom": "25px",
+                        },
+                    )
+                ], width=3, className="col-sm"),
+
+                dbc.Col(
+                [
+
+                    html.H3(
+                        "SafeCity Monitoring",
+                    ),
+
+                    html.H5(
+                        ["Sample SubHeader"],
+                    )
+
+                ], width=6, className="col-md", style = {"text-align": "center"}),
+
+                dbc.Col(
+                [
+                    html.A(
+                        html.Button("GitHub Page", id="learn-more-button"),
+                        href="https://github.com/abdylan/audioAnn_GUI",
+                    )
+                ], width = 3, className="col-sm")
+            ], className = "row justify-content-end")
+    ], style={"width": "100%"},
 )
 
 tabs_layout = html.Div(
@@ -118,84 +93,85 @@ tabs_layout = html.Div(
 
 audio_analysis_layout = html.Div(
     [
-        html.H3(
-            "Audio Data Analysis",
-            className="audio_label"
-        ),
-        html.H6(
-            "Detected Audio Sound",
-            className="audio_label"
-        ),
-        html.Br(),
-        html.Audio(
-            id="wav-player",
-            src=FILE,
-            controls=True
-        ),
-        html.H6(
-            "Audio Graph",
-        ),
-        html.Img(
-            id='spectrogram',
-            src="data:image/png;base64,{}".format(spec_data),
-            style = {"padding":"30px"})
-
-    ],
-    className="eight columns",
-    id="audio_analysis"
+        dbc.Col([
+            html.H3(
+                "Audio Data Analysis",
+                className="display-4"
+            ),
+            html.H6(
+                "Detected Audio Sound",
+                className="display-6"
+            ),
+            html.Br(),
+            html.Audio(
+                id="wav-player",
+                src=FILE,
+                controls=True
+            ),
+            html.H6(
+                "Audio Graph",
+            ),
+            html.Img(
+                id='spectrogram',
+                src="data:image/png;base64,{}".format(spec_data),
+                )
+        ])
+    ] , className = "audio_analysis",
 )
 
 audio_labelling_layout = html.Div(
     [
-        html.H3(
-            "Audio Data Labelling",
-            className="audio_label"
-        ),
-        html.H6(
-            "Predicted Labels",
-        ),
-        html.P(
-            "Labels predicted by AI Model",
-        ),
-        dcc.Dropdown(
-            id="ai-preds",
-            options=label_options,
-            multi=True,
-            value=list(LABELS.keys()),
-            className="dcc_control",
-        ),
-        html.H6(
-            "Label the Audio",
-        ),
-        html.P(
-            "Choose all labels that you feel are present in the audio"
-        ),
-        dcc.Dropdown(
-            id="human-labels",
-            options=label_options,
-            multi=True,
-            # value=list(LABELS.keys()),
-            className="dcc_control",
-        ),
-        html.Span(
-            "Submit",
-            id="submit-sample-button",
-            n_clicks=0,
-            className="button_labels",
-        ),
-        # html.A(
+        dbc.Col([
+            html.H3(
+                "Audio Data Labelling",
+                className="display-4"
+            ),
+            html.H6(
+                "Predicted Labels",
+            ),
+            html.P(
+                "Labels predicted by AI Model",
+            ),
+            dcc.Dropdown(
+                id="ai-preds",
+                options=label_options,
+                multi=True,
+                value=list(LABELS.keys()),
+                className="dcc_control",
+            ),
+            html.H6(
+                "Label the Audio",
+            ),
+            html.P(
+                "Choose all labels that you feel are present in the audio"
+            ),
+            dcc.Dropdown(
+                id="human-labels",
+                options=label_options,
+                multi=True,
+                # value=list(LABELS.keys()),
+                className="dcc_control",
+            ),
+            html.Span(
+                "Submit",
+                id="submit-sample-button",
+                n_clicks=0,
+                className="button_labels",
+            ),
+            # html.A(
 
-        #     html.Button("Submit", id="submit-sample-button"),
-        #     href="/",
-        # ),
-        html.Div(children=[],
-            id="button-output"
-        )
+            #     html.Button("Submit", id="submit-sample-button"),
+            #     href="/",
+            # ),
+            html.Div(children=[],
+                id="button-output"
+            )
+        ])
     ],
-    className="five columns",
-    id="audio_label",
+    className="audio_label_col",
     # style={"padding-top": "0px", "margin-top": "0px"}
 )
+
 
 alert_toast = dbc.Toast(
             "Please check out from Sidebar",
@@ -209,29 +185,31 @@ alert_toast = dbc.Toast(
             style={"position": "fixed", "top": 20, "right": 10, "width": 550},
         )
 
+
+
+
 app.layout = html.Div(
     [
         dcc.Interval(id="interval-updating-alert", interval=5000, n_intervals=0),
         dcc.Location(id="url"),
-        header_layout,
-        alert_toast,
-        # tabs_layout,
-        dbc.Container(id="info-container",
-            children=[
-                dbc.Row(
-                    children=[
-                        dbc.Col(sidebar, className="columnus"), #, width={"size": 3, "offset": 0, "order": 1}),
-                        dbc.Col(audio_analysis_layout, width="auto"), #, className="flex-display", id="parent_div", width={"size": 4, "offset": 0, "order": 3}),
-                        dbc.Col(audio_labelling_layout), #, className="flex-display", width={"size": 4, "offset": 0, "order": "last"})
-                    ],
-                ),
-            ],
-        ),
-    ],
-    className="mainContainer",
+
+        dbc.Col([sidebar, alert_toast,], width = 2),
+        dbc.Col(
+        [
+            dbc.Row([header_layout]),
+            dbc.Row([
+                dbc.Col([
+                    audio_analysis_layout
+                ]),
+                dbc.Col([
+                    audio_labelling_layout
+                ]),
+
+            ], id = "audio_row"),
+        ], width = 12)
+    ], className = "main_div",
 )
 
-#########    NAVLINK: ALERT Item Click    ################
 def find_alert_press(current_q, find_uri):
     target_idx, target_item = -1, None
     final_q = []
@@ -377,6 +355,8 @@ def button_submit(n_clicks, human_labels):
     print(labels_doc)
     # cosmos_client[database][label_collection].insert_one(labels_doc)
     return html.P("Successfully Submitted your Feedback. Thank You!")
+
+
 
 
 
