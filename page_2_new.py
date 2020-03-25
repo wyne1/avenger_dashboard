@@ -106,7 +106,6 @@ hist_layout = go.Layout(
         fixedrange=False,
     ),
 )
-# spec_data = get_spectrogram()
 
 app.layout = html.Div(
     # id = "lead_grid",
@@ -518,8 +517,6 @@ def getLatLonColor(selectedData, month, day):
         Input("bar-selector", "value"),
     ],
 )
-
-
 def update_graph(datePicked, selectedData):
     zoom = 16
     latInitial = 33.732570
