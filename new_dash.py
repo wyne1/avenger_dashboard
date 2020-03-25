@@ -69,6 +69,7 @@ header_layout = html.Div(
 
                 dbc.Col(
                 [
+                    # dbc.Button("GitHub Page", href="https://github.com/abdylan/audioAnn_GUI", color="secondary", className="mr-1", size="lg", id="button")
                     html.A(
                         html.Button("GitHub Page", id="learn-more-button"),
                         href="https://github.com/abdylan/audioAnn_GUI",
