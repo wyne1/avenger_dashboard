@@ -26,7 +26,7 @@ from utils.helpers import initialize_alert_navigation
 # it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = html.Div(
     [
-        html.H2("Alerts", className="display-4", style={"align": "center"}),
+        html.H2("Alerts", className="display-4"),
             # the column containing the toggle will be only as wide as the
             # toggle, resulting in the toggle being right aligned
             # width="auto"## width={"size": 3, "offset": 0, "order": 1}, # auto/True

@@ -1,5 +1,6 @@
 html {
   font-size: 62.5%;
+  background: white;
 }
 body {
   font-size: 1.5em;
@@ -8,13 +9,17 @@ body {
   font-family: "Helvetica Neue","Open Sans", "HelveticaNeue",  Helvetica, Arial,
     sans-serif;
   color: rgb(50, 50, 50);
+  background: white;
 }
 
-#mainContainer {
-  display: flex;
-  flex-direction: column;
+.main_div {
+  padding-right: 0;
+  margin-left: 3%;
+  background: white;
+  width: 103%;
 }
 
+<<<<<<< HEAD
 /* .div-for-charts{
   display: flex;
   flex-direction: column;
@@ -89,80 +94,36 @@ body {
   flex: 5;
   position: relative;
 }
+=======
+>>>>>>> origin/alert_q
 
-#audio_analysis {
-  /* display: flex;
-  flex-direction: column; */
-  margin: 0;
-  padding: 30px;
-  padding-bottom: 0px;
-  margin-bottom: 0px;
-  width: calc(100%-50px);
-  /* box-shadow: 2px 2px 2px 2px lightgrey; */
-  /* background: #8BFFB9; */
+
+.audio_analysis {
+  width: 100%;
 }
 
-#vertical_line {
-  border-left: 2px solid lightgrey;
-  border-radius: 5px;
-  top: 0;
+.audio_label_col {
+  width: 100%;
 }
 
-#audio_label {
-  /* box-shadow: 2px 2px 2px 2px lightgrey; */
-  vertical-align: text-top;
-  display: table;
-  flex-direction: column;
-  margin: 0;
-  padding: 30px;
-  padding-bottom: 0px;
-  margin-bottom: 0px;
-  width: calc(100%-10px);
-  /* background: #8BFFB9; */
+#audio_row {
+  align-items: start;
+  margin-top: 50px;
 }
 
-#plotly-image {
-  margin-bottom: 0px !important;
-  height: 120px !important;
+#tabs {
+  width: 100%;
+  padding-left: 5%;
 }
-
-
-#header {
-  align-items: center;
-}
-
-#player {
-  /* width: calc(80%-30px); */
-
-}
-
-.js-plotly-plot .plotly .modebar {
-  padding-top: 5%;
-  margin-right: 3.5%;
-}
-
 
 #learn-more-button {
   text-align: center;
   height: 100%;
-  padding: 0 20px;
   text-transform: none;
   font-size: 15px;
   float: right;
-  margin-right: 10px;
-  margin-top: 30px;
-}
-
-#submit-sample-button {
-  -ms-grid-column: 6;
-  -ms-grid-column-span: 1;
-  grid-column: 6 / 7;
-  -ms-grid-row: 1;
-  -ms-grid-row-span: 1;
-  grid-row: 1 / 2;
-  align-self: end;
-  float: right;
-  margin-top: 30px;
+  padding: 0 20px;
+  margin: 0px;
 }
 
 #leads_source_container {
