@@ -1,5 +1,6 @@
 html {
   font-size: 62.5%;
+  background: white;
 }
 body {
   font-size: 1.5em;
@@ -8,11 +9,14 @@ body {
   font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial,
     sans-serif;
   color: rgb(50, 50, 50);
+  background: white;
 }
 
 .main_div {
   padding-right: 0;
   margin-left: 3%;
+  background: white;
+  width: 103%;
 }
 
 
@@ -28,6 +32,11 @@ body {
 #audio_row {
   align-items: start;
   margin-top: 50px;
+}
+
+#tabs {
+  width: 100%;
+  padding-left: 5%;
 }
 
 #learn-more-button {

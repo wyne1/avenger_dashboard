@@ -44,7 +44,7 @@ header_layout = html.Div(
                 dbc.Col(
                 [
                     html.Img(
-                        src=app.get_asset_url("forest.png"),
+                        src=app.get_asset_url("forest-nobg.png"),
                         id="plotly-image",
                         style={
                             "height": "60px",
@@ -58,11 +58,11 @@ header_layout = html.Div(
                 [
 
                     html.H3(
-                        "SafeCity Monitoring",
+                        "Forest Avenger Dashboard",
                     ),
 
                     html.H5(
-                        ["Sample SubHeader"],
+                        ["The Forests Initiate"],
                     )
 
                 ], width=6, className="col-md", style = {"text-align": "center"}),
@@ -76,21 +76,31 @@ header_layout = html.Div(
                     )
                 ], width = 3, className="col-sm")
             ], className = "row justify-content-end")
-    ], style={"width": "100%"},
+    ], style={"width": "100%", "margin-left": "3%"},
 )
 
 tabs_layout = html.Div(
     [
-        html.Div(
+        dbc.Col(
             [
+                # dbc.NavItem(dbc.NavLink("Active", active=True, href="#")),
+                # dbc.NavLink("A link", href="#"),
                 dcc.Link("Audio Analysis", href="/"),
                 dcc.Link("Event History", href="/"),
             ],
             id="tabs",
             className="row tabs",
         ),
-    ],
+    ], style = {"width": "100%", "padding-left": "3%"}
 )
+
+# nav = dbc.Nav(
+#     [
+#         dbc.NavItem(dbc.NavLink("Active", active=True, href="#")),
+#         dbc.NavItem(dbc.NavLink("A link", href="#")),
+#     ],
+#     pills=True,
+# )
 
 audio_analysis_layout = html.Div(
     [
@@ -198,13 +208,15 @@ app.layout = html.Div(
         dbc.Col(
         [
             dbc.Row([header_layout]),
+            html.Br(),
+            dbc.Row([tabs_layout]),
             dbc.Row([
                 dbc.Col([
                     audio_analysis_layout
-                ]),
+                ], width = 7),
                 dbc.Col([
                     audio_labelling_layout
-                ]),
+                ], width = 5),
 
             ], id = "audio_row"),
         ], width = 12)

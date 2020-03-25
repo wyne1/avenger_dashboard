@@ -4,9 +4,6 @@ dash_examples/
 __pycache__/
 *.pyc
 config.ini
-<<<<<<< HEAD
 *.csv
-=======
 .idea/
 *.wav
->>>>>>> f3af17c897c0a77b9d26dfcf924f4572d70d13d9
