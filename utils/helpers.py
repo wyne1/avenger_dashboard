@@ -57,6 +57,7 @@ def final_alert_press(alert_uri):
     # print("\t[DEBUG 1] result:", result)
 
     node = result['node'].values[0]
+    timestamp = result['timestamp'].values[0]
 
     wav_fname = result['wav_fname'].values[0]
     footstep_pred = result['footstep_pred'].values[0]
@@ -64,7 +65,8 @@ def final_alert_press(alert_uri):
     speech_times = result['speech_times'].values[0]
     speech_times = [int(x) for x in speech_times.split(' ')]
 
-    return wav_fname, footstep_pred, speech_times, node
+
+    return wav_fname, footstep_pred, speech_times, node, timestamp
 
 def extract_alert_data(input_doc):
     print("\t INPUT Doc:", input_doc)

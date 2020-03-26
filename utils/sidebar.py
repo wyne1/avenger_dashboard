@@ -61,7 +61,7 @@ sidebar = html.Div(
                 vertical=True,
                 pills=True,
                 justified=True,
-                id="current_queue"
+                id="current-queue"
             ),
             id="alert-queue",
         ),

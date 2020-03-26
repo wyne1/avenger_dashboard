@@ -34,18 +34,14 @@ from utils.blob_storage import init_azure_storage, download_blob
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+DEBUG = config["MISC"]["DEBUG"]
+
 app = dash.Dash(__name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/brPBPO.css'],
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}]
 )
 server = app.server
-CACHE_CONFIG = {
-    # try 'filesystem' if you don't want to setup redis
-    'CACHE_TYPE': 'redis',
-    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
-}
-# cache = Cache()
-# cache.init_app(server, config=CACHE_CONFIG)
+# app.config.suppress_callback_exceptions = True
 
 lock = Lock()
 
@@ -149,13 +145,10 @@ tabs_layout = html.Div(
 audio_analysis_layout = html.Div(
     [
         dbc.Col([
-            html.H3(
-                "Audio Data Analysis",
-                className="display-4"
-            ),
-            html.H6(
-                "Detected Audio Sound",
-                className="display-6"
+            dcc.Markdown(
+                generate_markdown_text(-99, "1999-00-00 00:00"),
+                className="audio_label",
+                id="alert-markdown"
             ),
             html.Br(),
             html.Audio(
@@ -168,12 +161,12 @@ audio_analysis_layout = html.Div(
             ),
             html.Img(
                 id='spectrogram',
-                src="data:image/png;base64,{}".format(spec_data),
+                src=spec_data,
                 ),
             html.Img(
-            id='speech-graph',
-            src="data:image/png;base64,{}".format(speech_data),
-            style={"padding":"30px"}
+                id='speech-graph',
+                src=speech_data,
+                style={"padding":"30px"}
             )
         ])
     ] , className = "audio_analysis",
@@ -218,6 +211,12 @@ audio_labelling_layout = html.Div(
                 n_clicks=0,
                 className="button_labels",
             ),
+            html.Span(
+                "Benign",
+                id="benign-sample-button",
+                n_clicks=0,
+                className="button_labels",
+            ),
             # html.A(
 
             #     html.Button("Submit", id="submit-sample-button"),
@@ -253,7 +252,7 @@ app.layout = html.Div(
         dcc.Interval(id="interval-updating-alert", interval=5000, n_intervals=0),
         dcc.Location(id="url"),
 
-        dbc.Col([sidebar, alert_toast,], width = 2),
+        dbc.Col([sidebar, alert_toast], width = 2),
         dbc.Col(
         [
             dbc.Row([header_layout]),
@@ -290,10 +289,10 @@ def find_alert_press(current_q, find_uri):
     return target_idx, final_q
 
 @app.callback(
-    [Output("current_queue", "children"), Output("ai-preds", "value"), Output("wav-player", "src"),
+    [Output("current-queue", "children"), Output("ai-preds", "value"), Output("wav-player", "src"),
         Output("spectrogram", "src"), Output("speech-graph", "src"), Output("alert-markdown", "children")],
     [Input("url", "pathname")],
-    [State("current_queue", "children")]
+    [State("current-queue", "children")]
 )
 def alert_item_button(url_path, current_q):
     """
@@ -313,7 +312,7 @@ def alert_item_button(url_path, current_q):
             ai_preds = ["cricket", "birds"]
             return [current_q, no_update, no_update, no_update, no_update, no_update]
         else:
-            wav_fname, ai_preds, speech_times, node = final_alert_press(current_alert)
+            wav_fname, ai_preds, speech_times, node, timestamp = final_alert_press(current_alert)
             print("\t[DEBUG 2]: ", wav_fname, ai_preds, speech_times)
             wav_path = "assets/{}".format(wav_fname)
             wav_src_path = "http://localhost:8050/assets/{}".format(wav_fname)
@@ -323,7 +322,7 @@ def alert_item_button(url_path, current_q):
             print("\tGOT SPECTROGRAM", len(spec_data))
             speech_data = visualize_voice_graph(speech_times, duration=duration)
             print("\tGOT Speech Graph", len(speech_data))
-            return [final_q, ai_preds, wav_src_path, spec_data, speech_data, generate_markdown_text(node, "00:00:00")]
+            return [final_q, ai_preds, wav_src_path, spec_data, speech_data, generate_markdown_text(node, timestamp)]
     except:
         print(traceback.print_exc())
         raise PreventUpdate
@@ -344,7 +343,7 @@ def append_alert_queue(alert_queue, timestamp):
     [Output("alert-popup", "is_open"), Output("alert-queue", "children")],
     [Input("interval-updating-alert", "n_intervals")],
     [
-        State("current_queue", "children"),
+        State("current-queue", "children"),
         State("alert-queue", "children"),
         State("url", "pathname"),
     ]
@@ -369,13 +368,6 @@ def interval_alert(n_intervals, current_queue, alert_queue, url_path):
 
     print("===================     Polling Interval:", n_intervals, "   ===================")
     current_q_len = len(current_queue)
-
-    """
-    new_db_count = get_doc_count(cosmos_client[database][pred_collection])
-    if new_db_count == pred_db_count: ## No ALerts. Keep displaying previous items
-        print('[A] No Changes ...')
-        return [True]
-    """
 
     ## COSMOS ALERT !!
     new_db_count = get_doc_count(cosmos_client[database][pred_collection])
@@ -416,7 +408,7 @@ def interval_alert(n_intervals, current_queue, alert_queue, url_path):
             vertical=True,
             pills=True,
             justified=True,
-            id="current_queue"
+            id="current-queue"
         )
         # updated_queue = initialize_alert_navigation()
         # print("[2] Updating Queue")
@@ -462,7 +454,7 @@ def find_next_alert(current_q, target_url):
     [
         State("human-labels", "value"),
         State("url", "pathname"),
-        State("current_queue", "children")
+        State("current-queue", "children")
     ]
 )
 def button_submit(n_clicks, human_labels, url, current_queue):
