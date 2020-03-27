@@ -34,7 +34,7 @@ from utils.blob_storage import init_azure_storage, download_blob
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-DEBUG = config["MISC"]["DEBUG"]
+# DEBUG = config["MISC"]["DEBUG"]
 
 app = dash.Dash(__name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/brPBPO.css'],
@@ -54,12 +54,12 @@ tic = time.time()
 cosmos_client = MongoClient(config["COSMOS"]["URI"])
 
 print("Mongo Connection Successful. Printing Mongo Details ...")
-print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
-             for db in cosmos_client.list_database_names()))
+# print(dict((db, [collection for collection in cosmos_client[db].list_collection_names()])
+#              for db in cosmos_client.list_database_names()))
 
-pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
-print("[-2] Time Taken ", time.time()-tic)
-print("\t[COUNT] Inital DB Count:", pred_db_count)
+# pred_db_count = get_doc_count(cosmos_client[database][pred_collection])
+# print("[-2] Time Taken ", time.time()-tic)
+# print("\t[COUNT] Inital DB Count:", pred_db_count)
 pred_db_count = 6
 
 tic = time.time()
@@ -205,18 +205,24 @@ audio_labelling_layout = html.Div(
                 # value=list(LABELS.keys()),
                 className="dcc_control",
             ),
-            html.Span(
-                "Submit",
-                id="submit-sample-button",
-                n_clicks=0,
-                className="button_labels",
-            ),
-            html.Span(
-                "Benign",
-                id="benign-sample-button",
-                n_clicks=0,
-                className="button_labels",
-            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Span(
+                        "Benign",
+                        id="benign-sample-button",
+                        n_clicks=0,
+                        className="button_labels",
+                    ),
+                ]),
+                dbc.Col([
+                    html.Span(
+                        "Submit",
+                        id="submit-sample-button",
+                        n_clicks=0,
+                        className="button_labels",
+                    ),
+                ]),
+            ]),
             # html.A(
 
             #     html.Button("Submit", id="submit-sample-button"),

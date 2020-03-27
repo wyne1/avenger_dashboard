@@ -37,6 +37,20 @@ body {
   padding-left: 5%;
 }
 
+#submit-sample-button {
+  margin: 0;
+  width: 60%;
+  float: right;
+  margin-top: 15px;
+}
+
+#benign-sample-button {
+  margin: 0;
+  width: 60%;
+  float: left;
+  margin-top: 15px;
+}
+
 #learn-more-button {
   text-align: center;
   height: 100%;
