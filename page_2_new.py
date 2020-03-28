@@ -33,11 +33,11 @@ app = dash.Dash(
 
 label_options = [{"label": str(LABELS[label]), "value": str(label)} for label in LABELS]
 
-df = pd.read_csv("new_data.csv",
+df = pd.read_csv("data/new_data.csv",
     dtype=object,
 )
 
-df1 = pd.read_csv("new_data1.csv",
+df1 = pd.read_csv("data/new_data1.csv",
     dtype=object,
 )
 

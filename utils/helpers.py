@@ -13,7 +13,7 @@ def initialize_alert_navigation(active=None):
     3) Returning a list for sidebar.Nav children
     """
 
-    alert_df = pd.read_csv('alert_db.csv')
+    alert_df = pd.read_csv('data/alert_db.csv')
     print("Loaded Queue DF | Shape: {}".format(alert_df.shape))
     print("Current Active IDX:", active, type(active))
     alert_links = []
@@ -35,22 +35,22 @@ def initialize_alert_navigation(active=None):
     return alert_links
 
 def append_alertDB_row(node, timestamp, name, wav_fname, footstep_pred, speech_times):
-    with open('alert_db.csv', mode='a') as alert_file:
+    with open('data/alert_db.csv', mode='a') as alert_file:
         alert_writer = csv.writer(alert_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         alert_writer.writerow([timestamp, node, False, False, name, wav_fname, footstep_pred, speech_times])
 
 def remove_alertDB_row(sample_timestamp):
     print("Removing Sample:", sample_timestamp)
     tic = time.time()
-    with open("alert_db.csv", "r") as alert_db:
+    with open("data/alert_db.csv", "r") as alert_db:
         final_data = [row for row in alert_db.readlines() if sample_timestamp not in row]
 
-    with open("alert_db.csv", "w") as alert_db:
+    with open("data/alert_db.csv", "w") as alert_db:
         alert_db.writelines(final_data)
     print("[TIME] Remove Completed CSV Sample: {:.4f} sec".format(time.time()-tic))
 
 def final_alert_press(alert_uri):
-    alert_df = pd.read_csv('alert_db.csv')
+    alert_df = pd.read_csv('data/alert_db.csv')
     result = alert_df[alert_df['name'] == alert_uri]
     if len(result) == 0:
         return None, None, None
